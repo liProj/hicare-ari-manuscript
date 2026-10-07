@@ -1,0 +1,12 @@
+[
+  {
+    "supplied_file": "1.pdf",
+    "manuscript_asset": "hicare_methods_supplied.pdf",
+    "sha256": "7a95baf4d56974fde2293cc2f6b9e925838ea2d9bd318fdcf4bce148d0321119"
+  },
+  {
+    "supplied_file": "2.pdf",
+    "manuscript_asset": "risk_monitoring_supplied.pdf",
+    "sha256": "99742753b256bb78e07fc2f818b63ea361278ed09290876943f28cb94a77e8ee"
+  }
+]

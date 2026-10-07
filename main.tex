@@ -81,12 +81,12 @@ Admission volumes were similar in children and adults, but deaths were concentra
 The public data lack linkable patient and hospital identifiers. The analysis unit is a hospitalisation, and a facility group is approximated by the combination of hospital canton, facility class, managing entity and urban or rural location. A group may contain several hospitals. Because principal diagnoses come from discharge records, the models support retrospective registry analysis. The case definition excludes perinatal respiratory diseases, and infant findings are restricted accordingly.
 
 \subheading{3.2 Separate references for risk estimation and outcome comparison}
-Figure 1 organises risk estimation and population monitoring as two branches sharing the registry cohort. HiCARE uses patient records and facility history to estimate mortality probabilities (Figure 1A). Regional outcome comparisons use an independent reference (Figure 1B) to avoid absorbing facility differences of interest into expected deaths. The information included is therefore determined by the comparison being made.
+Figure 1 links the registry inputs to two analytical branches with distinct purposes. HiCARE combines 33 base features with 18 historical facility-profile variables, then applies stratified calibration and monthly updating to estimate mortality probabilities (Figure 1A). The monitoring branch constructs separate case-mix, historical-period and seasonal references for regional outcomes, non-COVID mortality and paediatric demand (Figure 1B). These independent references preserve the differences each comparison is intended to examine.
 
 \clearpage
 
-\begin{center}\includegraphics[width=\linewidth,height=179.66mm,keepaspectratio]{figures/x01_architecture.pdf}
-\captionof{figure}{Framework for risk estimation and independent population monitoring. A, Individual features and historical facility profiles enter base learning, stratified calibration and monthly updating, evaluated through cross-validation and temporal holdout. B, Regional and facility comparisons, non-COVID period comparisons and paediatric demand use separate case-mix, fixed historical risk and seasonal count references. Equations summarise marginal calibration, monthly updating and the standardised mortality ratio; $q_i$ is the independent reference probability. Prediction results are in Tables S4–S5 and population results in Tables S7 and S13.}\label{fig:arch}
+\begin{center}\includegraphics[width=\linewidth,height=173.925mm,keepaspectratio]{figures/risk_monitoring_supplied.pdf}
+\captionof{figure}{Analytical framework for risk estimation and independent population monitoring. The shared registry contains 576,195 ARI admissions, including 41,048 in-hospital deaths; historical profiles draw on 9,463,108 non-ARI discharges. A, LightGBM and XGBoost predictions enter interaction stacking, residual correction and marginal projection, followed by monthly probability updating. Cross-validation and temporal holdout results summarise discrimination and calibration (Tables S4–S5). B, Independent references support regional and facility mortality comparisons, non-COVID historical comparisons and seasonal paediatric demand monitoring (Tables S7 and S13). Observed and expected deaths define the standardised mortality ratio; $q_i$ denotes an independent reference probability, not the HiCARE output. The branches share records but use different expected values. Provincial ratios and the paediatric prediction interval summarise monitoring results for further investigation.}\label{fig:arch}
 \end{center}
 For population g, observed deaths $O_g$ are the sum of outcomes, expected deaths $E_g$ are the sum of reference probabilities $q_i$, and the standardised mortality ratio (SMR) is $O_g$/$E_g$. Regional and facility $q_i$ values come from an independent LightGBM model restricted to variables such as age, sex, diagnosis and calendar background. Non-COVID period comparisons fix the 2015–2019 risk relationship, whereas paediatric demand uses pre-pandemic seasonal count models. These references assess differences between comparable cases, departures from historical relationships and changes in admission demand, respectively.
 
@@ -100,7 +100,7 @@ The analyses share a registry cohort but not a common expected value. HiCARE dis
 Facility classes only coarsely describe admission roles. To capture differences in the populations actually served, we used 9,463,108 non-ARI discharges to summarise completed admissions in each facility group during the 12 months preceding the target month. The resulting 18 profile variables comprise seven service statistics and 11 diagnostic chapter proportions. They enter the base models alongside 33 individual and historical-context features.
 
 
-\begin{center}\includegraphics[width=\linewidth,height=169.12mm,keepaspectratio]{figures/x03_provider_profiles.pdf}
+\begin{center}\includegraphics[width=\linewidth,height=167.725mm,keepaspectratio]{figures/x03_provider_profiles.pdf}
 \captionof{figure}{Historical non-ARI service profiles. Left, Mean profiles by facility class. Right, Association between non-ARI all-cause and ARI mortality proportions across facility groups.}\label{fig:profiles}
 \end{center}
 Service statistics cover discharge volume, all-cause mortality, early-death composition, length of stay, age composition and cross-canton admission. Profiles require at least 30 historical records, with at least 10 deaths additionally required for early-death composition. A patient's own length of stay and post-discharge derived fields do not enter that patient's prediction features. Windows, missing-data handling and complete definitions are provided in Supplementary Section S1.
@@ -108,18 +108,18 @@ Service statistics cover discharge volume, all-cause mortality, early-death comp
 Age and diagnostic composition differ systematically between facilities, and non-ARI and ARI mortality proportions are associated. Profiles may therefore capture persistent case complexity and referral scope, supplementing sparse target records. However, they combine case selection and service context, and correlation alone cannot distinguish their clinical sources. Feature attribution and province-held-out evaluation examine whether the models use these inputs and how the corresponding configurations transfer.
 
 \subheading{3.4 Stratified calibration, temporal updating and evaluation protocols}
-Figure 3 separates base learning, stratified calibration and temporal maintenance and identifies their evaluation settings. LightGBM [34] and XGBoost [35] receive 33 base features and 18 facility-profile variables (Figure 3A). Clipped member probabilities are transformed to logit scores $z_i^{(m)}$, where m indexes learners. Stratified stacking allows the child indicator $c_i$ and COVID-19 indicator $v_i$ to modify the intercept and member weights, accommodating differences between these populations (Figure 3B).
+Figure 3 details the learners, calibration stages and evaluation protocols underlying Figure 1A. LightGBM [34] and XGBoost [35] receive 33 base features and 18 facility-profile variables; panel A specifies their hyperparameters and early stopping. Clipped member probabilities become logit scores $z_i^{(m)}$, where m indexes learners. Stratified stacking lets the child indicator $c_i$ and COVID-19 indicator $v_i$ modify the intercept and member weights (Figure 3B, step 2a). Its expanded expression in the figure is equivalent to equation (2).
 
 \begin{equation}
 z_i^A=\alpha+bc_i+dv_i+\sum_m(a_m+b_mc_i+d_mv_i)z_i^{(m)}.
 \end{equation}
 \clearpage
-Equation (2) yields the stratified score $z_i^A$. A shallow residual tree then learns remaining deviations from specified variables $u_i$, including age, sex, ethnicity, facility, region and month, to obtain a corrected score.
+The stratified score $z_i^A$ from equation (2) enters a shallow residual tree (Figure 3B, step 2b). The tree learns remaining deviations from specified variables $u_i$, including age, sex, ethnicity, facility, region and month, to obtain a corrected score.
 
 \begin{equation}
 z_i^B=z_i^A+h(u_i,z_i^A).
 \end{equation}
-Residual correction minimises record-level loss, whereas population monitoring also requires reliable predicted death totals. We therefore apply an unpenalised logistic projection to $z_i^B$ and marginal-category indicators $g_k(i)$ to obtain the HiCARE probability.
+Residual correction minimises record-level loss, whereas accurate group totals require a further calibration step. An unpenalised logistic projection combines $z_i^B$ with marginal-category indicators $g_k(i)$ to obtain the HiCARE probability (Figure 3B, step 2c).
 
 \begin{equation}
 p_i^H=\sigma\!\left(\beta_0+\beta_1z_i^B+\sum_k\gamma_kg_k(i)\right).
@@ -136,7 +136,7 @@ Temporal maintenance forms a four-dimensional input from $z_i^H$=logit($p_i^H$),
 \end{equation}
 I is the four-dimensional identity matrix. Each month is predicted using the previous month's state, followed by a Laplace update when outcomes become available. Four state coefficients and q=0.1 were selected by forward-validation log loss during 2018–2021 (Table S2). Development used 2015–2021 and testing used 2022–2023, comparing static, rolling and identically state-updated models. The retrospective simulation did not strictly incorporate reporting delay.
 
-Within-distribution evaluation uses five stratified outer folds. Within each training partition, three folds fit the base models and one supplies nested predictions; these train the second layer before evaluation on the outer holdout (Figure 3D). Fifteen per cent of second-layer records support residual-tree early stopping, while projection uses all second-layer records. Historical statistics are constructed before splitting, so separation of direct model training does not imply complete isolation of historical information.
+Within-distribution evaluation uses five stratified outer folds. In each training partition, four inner splits rotate three fitting folds and one prediction fold, giving 20 outer–inner combinations per learner (Figure 3D). Nested predictions train the second layer, evaluated on the outer holdout. Fifteen per cent of second-layer records support residual-tree early stopping; projection uses all records. Historical statistics are precomputed, so direct training separation does not ensure complete historical-information isolation.
 
 Geographic transfer uses six province-grouped folds with geographic identifiers removed and evaluates only profile-ensemble configurations. The configuration without profiles contains LightGBM, XGBoost and TabM; the profile configuration contains the first two and does not run the full second layer. Local historical data remain available at test time, and precomputed context may contain past outcomes from held-out provinces. Differences therefore involve profiles, learner composition and available history together.
 
@@ -146,8 +146,8 @@ Primary results use random seed 0 and record-level paired bootstrap resampling. 
 
 \clearpage
 
-\begin{center}\includegraphics[width=\linewidth,height=205mm,keepaspectratio]{figures/x34_hicare_detailed.pdf}
-\captionof{figure}{HiCARE stratified calibration, temporal updating and evaluation. A, Base learners and parameters. B, Stratified stacking, residual correction and marginal projection, corresponding to equations (2)–(4). C, Four-dimensional states and the predict-then-update monthly cycle, corresponding to equations (5)–(6). D, Nested cross-validation, temporal holdout and province holdout; the last evaluates profile ensembles only. E, Comparators and metrics. $c_i$ and $v_i$ indicate children and COVID-19, m indexes learners and $g_k$ indicates marginal categories. Historical summaries are precomputed, and projection shares some outcomes with residual early stopping. Marginal fitting constraints do not automatically hold in test populations.}\label{fig:hicare_detailed}
+\begin{center}\includegraphics[width=\linewidth,height=205mm,keepaspectratio]{figures/hicare_methods_supplied.pdf}
+\captionof{figure}{HiCARE stratified calibration, temporal updating and evaluation protocols. A, Base features, historical profiles, LightGBM and XGBoost hyperparameters, and conversion of member probabilities to logit scores. B, Three calibration stages comprise stratified stacking (2a), residual-tree correction (2b) and marginal logistic projection (2c), corresponding to equations (2)–(4). C, Four-dimensional monthly states and the predict-then-update cycle, corresponding to equations (5)–(6). D, Nested cross-validation, temporal holdout and province-grouped holdout; the province protocol evaluates profile ensembles without the full second layer. E, Reference models and evaluation metrics. The indicators $c_i$ and $v_i$ identify children and COVID-19, m indexes learners, and $g_k$ identifies marginal categories. Historical summaries are precomputed, and projection shares outcomes with residual early stopping. The marginal constraint applies to fitting data and does not guarantee calibration in held-out populations.}\label{fig:hicare_detailed}
 \end{center}
 \clearpage
 \mainheading{4 Results}

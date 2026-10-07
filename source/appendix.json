@@ -8,7 +8,7 @@
     },
     {
       "type": "p",
-      "text": "This appendix accompanies the main manuscript, which retains 27 figures. Supplementary figures are numbered S1–S6 and all 14 tables are numbered S1–S14. Reference numbers follow the main text. Section S1 provides detailed methods and evaluation conditions, S2 contains numerical results, S3 presents supplementary figures and S4 extends the interpretation of the main-text figures. Original result plots retain their data and vector content; main-text Figures 1 and 3 are redrawn methodological schematics. Legacy labels “reference LR” and “reference model” denote LR-7, and “CARE v1” denotes EW. In geographic evaluation, the HiCARE label denotes the profile ensemble configuration."
+      "text": "This appendix accompanies the main manuscript, which retains 27 figures. Supplementary figures are numbered S1–S6 and all 14 tables are numbered S1–S14. Reference numbers follow the main text. Section S1 provides detailed methods and evaluation conditions, S2 contains numerical results, S3 presents supplementary figures and S4 extends the interpretation of the main-text figures. Original result plots retain their data and vector content; main-text Figures 1 and 3 summarise the analytical framework and detailed modelling protocols. Legacy labels “reference LR” and “reference model” denote LR-7, and “CARE v1” denotes EW. In geographic evaluation, the HiCARE label denotes the profile ensemble configuration."
     },
     {
       "type": "h1",
@@ -388,7 +388,7 @@
     },
     {
       "type": "p",
-      "text": "Figure 1 connects individual risk estimation with population comparisons. The prediction branch combines registry and historical facility information into scores, then uses group correction and monthly maintenance to estimate current probabilities. The independent branch constructs expected values for specific comparisons. Regional analyses adjust case mix, non-COVID period comparisons retain the pre-pandemic relationship, and paediatric demand analyses extrapolate seasonal counts. These distinct references allow individual ranking, mortality departures and admission demand to be interpreted on clearly defined scales."
+      "text": "Figure 1 traces the shared registry inputs into prediction and independent monitoring. Panel A links 33 base features and 18 facility-profile variables to model fitting, stratified calibration and monthly maintenance. Its cross-validation and temporal results connect these stages to discrimination and calibration, including the comparison with identically updated EW. Panel B instead defines separate expected values for each monitoring question. Case-mix adjustment supports regional comparisons, the fixed pre-pandemic risk relationship supports non-COVID period comparisons, and seasonal counts provide the paediatric demand reference. Provincial mortality ratios and the paediatric prediction interval therefore describe departures from these specific references rather than predictive gains attributable to HiCARE."
     },
     {
       "type": "small",
@@ -408,7 +408,7 @@
     },
     {
       "type": "p",
-      "text": "Figure 3 maps base learners, three calibration steps and monthly maintenance to their respective evaluation protocols. Base and second-layer hyperparameters are detailed in Section S1.4, the four-dimensional update in S1.5, and comparators and metric conditions in S1.9. The schematic describes fitting steps without adding experimental results. Equation (2) combines the stacking interaction terms and is equivalent to equation (S2). Monthly states are used only for temporal maintenance, not in-distribution evaluation. The province protocol evaluates a separate profile ensemble configuration."
+      "text": "Figure 3 expands the prediction branch into five panels. Panel A specifies base learners and their inputs; panel B links stratified stacking, residual correction and marginal projection to equations (2)–(4). The expanded stacking expression is equivalent to main-text equation (2) and equation (S2). Panel C confines monthly state updating to temporal maintenance. Panel D distinguishes nested cross-validation from temporal and province-grouped holdout, while panel E defines comparators and metric families. The province protocol evaluates profile ensembles without the full second layer. Hyperparameters are detailed in S1.4, state updating in S1.5, and metric conditions in S1.9. Precomputed history and shared outcomes between residual early stopping and projection remain relevant to interpreting these protocols."
     },
     {
       "type": "h2",

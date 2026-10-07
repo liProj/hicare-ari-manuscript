@@ -5,7 +5,7 @@
 - The original cohort-selection flowchart and its main/appendix references are absent.
 - Figure numbering and all English textual references were shifted consistently after deletion.
 - **1,382 non-Chinese table cells, including the numerical result cells, were compared directly with the source inventory and are unchanged.** Translated labels were checked against the original definitions.
-- All 31 retained result and nested-fitting plots preserve their original English vector PDFs. The two updated method schematics are editable TikZ drawings using the manuscript’s existing parameters and results.
+- All 31 retained result and nested-fitting plots preserve their original English vector PDFs. Figures 1 and 3 embed the supplied vector PDFs without modification, mapped from original 2.pdf and 1.pdf, respectively. Their captions and corresponding descriptions in Sections 3.2, 3.4 and Appendix S4 have been updated. Source-file SHA-256 values are recorded in source/supplied_figure_provenance.json.
 - Text extraction from both compiled documents and every included figure found no Chinese characters.
 - Both documents were compiled twice with XeLaTeX. Final logs contain no overfull boxes, missing-character warnings or undefined-reference warnings.
 - All 30 accompanying Python analysis files passed syntax parsing. Full model training and source-data downloads were not rerun for the translation release.

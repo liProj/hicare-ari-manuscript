@@ -1,7 +1,7 @@
 [
   {
     "n": 2,
-    "file": "x01_architecture.pdf",
+    "file": "risk_monitoring_supplied.pdf",
     "label": "fig:arch"
   },
   {
@@ -161,7 +161,7 @@
   },
   {
     "n": 34,
-    "file": "x34_hicare_detailed.pdf",
+    "file": "hicare_methods_supplied.pdf",
     "label": "fig:hicare_detailed"
   }
 ]

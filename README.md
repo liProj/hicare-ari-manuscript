@@ -9,7 +9,7 @@ This repository contains the English LaTeX manuscript, its figures and numerical
 
 ## Build the paper
 
-Install Python 3 and a LaTeX distribution with **XeLaTeX** (MiKTeX or TeX Live). Required packages include fontspec, amsmath, amssymb, graphicx, booktabs, longtable, tabularx, array, geometry, caption, hyperref, needspace, pdflscape and TikZ/standalone for the two editable method diagrams. Times New Roman and Arial are used when installed, with Latin Modern fallbacks.
+Install Python 3 and a LaTeX distribution with **XeLaTeX** (MiKTeX or TeX Live). Required packages include fontspec, amsmath, amssymb, graphicx, booktabs, longtable, tabularx, array, geometry, caption, hyperref, needspace, pdflscape. Times New Roman and Arial are used when installed, with Latin Modern fallbacks.
 
 From the repository root:
 
@@ -20,15 +20,15 @@ python scripts/compile.py
 The script compiles both documents twice and writes `main.pdf` and `appendix.pdf`. An explicit executable path can be supplied with `--xelatex PATH`. LaTeX source is directly editable; alternatively, edit the checked English JSON in `source/` and run:
 
 ```sh
-python scripts/compile.py --regenerate --diagrams
+python scripts/compile.py --regenerate
 ```
 
-Regeneration overwrites `main.tex` and `appendix.tex` from those JSON files. The two method diagrams have editable TikZ sources in `figures/x01_architecture.tex` and `figures/x34_hicare_detailed.tex`. All other included plots are original English vector PDFs with unchanged plotted numerical results. The paper can be built without downloading any admission records or rerunning model training.
+Regeneration overwrites `main.tex` and `appendix.tex` from those JSON files. Figure 1 embeds the supplied vector PDF `figures/risk_monitoring_supplied.pdf` (original `2.pdf`); Figure 3 embeds `figures/hicare_methods_supplied.pdf` (original `1.pdf`). Their byte-level provenance is recorded in `source/supplied_figure_provenance.json`. The earlier TikZ files `x01_architecture.tex` and `x34_hicare_detailed.tex` are legacy versions and are not used by the current manuscript. The optional `--diagrams` flag rebuilds only those legacy assets and requires TikZ/standalone. All other included plots are original English vector PDFs with unchanged plotted numerical results. The paper can be built without downloading any admission records or rerunning model training.
 
 ## Repository contents
 
 - `main.tex`, `appendix.tex` and their compiled PDFs.
-- `figures/` — 33 retained figures, including two editable methodological schematics.
+- `figures/` — 33 figures selected by the manifest, including two supplied vector methodological schematics; earlier schematic assets are retained for reference.
 - `source/` — checked English manuscript blocks, table cells and figure manifest.
 - `code/` — original cohort, feature, model, evaluation and plotting implementations. Selected legacy explanatory comments were aligned with the manuscript; analysis algorithms were not changed for this translation.
 - `results/v2/tables/` and `results/tables/` — archived aggregate numerical outputs, with English analytical variable names. These are source results, not newly estimated results.
