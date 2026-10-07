@@ -867,7 +867,7 @@
     },
     {
       "type": "p",
-      "text": "The study used publicly available INEC hospital-bed and discharge registry data and historical annual releases [33]. This manuscript is a research revision. The available materials do not provide verifiable ethics approval or exemption, author contributions, funding or competing-interest statements; these must be completed by the authors from the actual study circumstances. Manuscript sources, figures and accompanying analysis code are available at https://github.com/liProj/hicare-ari-manuscript. Detailed methods, complete numerical results and supplementary figures are provided in the Supplementary Appendix."
+      "text": "The study used publicly available INEC hospital-bed and discharge registry data and historical annual releases [33]. This manuscript is a research revision. Manuscript sources, figures and accompanying analysis code are available at https://github.com/liProj/hicare-ari-manuscript. Detailed methods, complete numerical results and supplementary figures are provided in the Supplementary Appendix."
     },
     {
       "type": "break"
