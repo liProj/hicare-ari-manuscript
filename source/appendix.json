@@ -1,0 +1,662 @@
+{
+  "title": "Supplementary Appendix",
+  "subtitle": "Detailed methods, complete numerical results and extended interpretation",
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Guide to the Supplementary Appendix"
+    },
+    {
+      "type": "p",
+      "text": "This appendix accompanies the main manuscript, which retains 27 figures. Supplementary figures are numbered S1–S6 and all 14 tables are numbered S1–S14. Reference numbers follow the main text. Section S1 provides detailed methods and evaluation conditions, S2 contains numerical results, S3 presents supplementary figures and S4 extends the interpretation of the main-text figures. Original result plots retain their data and vector content; main-text Figures 1 and 3 are redrawn methodological schematics. Legacy labels “reference LR” and “reference model” denote LR-7, and “CARE v1” denotes EW. In geographic evaluation, the HiCARE label denotes the profile ensemble configuration."
+    },
+    {
+      "type": "h1",
+      "text": "S1 Detailed methods and evaluation conditions"
+    },
+    {
+      "type": "h2",
+      "text": "S1.1 Study cohort and unit of analysis"
+    },
+    {
+      "type": "p",
+      "text": "Data came from Ecuador’s National Institute of Statistics and Censuses (INEC) hospital-bed and discharge registry and historical annual releases [33]. ARI admissions in 2015–2023 were selected using principal ICD-10 diagnoses J00–J06, J09–J18, J20–J22, J85–J86 and U07.1–U07.2. We excluded 632 records admitted before 2015 and 14 records coded as COVID-19 but admitted before 2020. The outcome was in-hospital death recorded at discharge. Children were defined as ages 0–19 and adults as ages 20 or older. The final cohort comprised 576,195 admissions, including 295,225 paediatric admissions with 1,575 deaths and 280,970 adult admissions with 39,473 deaths. A further 9,463,108 non-ARI discharge records informed facility profiles. The case definition excluded perinatal respiratory conditions, which also limits the scope of infant analyses [19]."
+    },
+    {
+      "type": "p",
+      "text": "The admission was the unit of analysis. Public records lacked identifiers linking admissions to individual patients and directly usable hospital identifiers. We therefore defined a facility group by the combination of hospital canton, facility class, administering entity and urban or rural location; a group could include multiple hospitals. Principal diagnoses came from discharge records, supporting retrospective risk monitoring. Individual length of stay, discharge date and outcome-derived fields were excluded from the main individual predictors. Missing categories were represented separately, and unseen categories were treated as missing."
+    },
+    {
+      "type": "h2",
+      "text": "S1.2 Probability references for distinct monitoring questions"
+    },
+    {
+      "type": "p",
+      "text": "Two types of probability served different monitoring purposes. For admission i, let y_i denote the outcome, x_i the coded patient characteristics, h_i the facility group and t_i the admission month. HiCARE estimated mortality risk p_i using patient, facility and historical context. An independent standardisation model estimated reference risk q_i from a restricted predictor set. Summing q_i within group g gave expected deaths E_g, which were compared with observed deaths O_g to form the standardised mortality ratio SMR_g."
+    },
+    {
+      "type": "eq",
+      "latex": "O_g=\\sum_{i\\in g}y_i,\\quad E_g=\\sum_{i\\in g}q_i,\\quad \\mathrm{SMR}_g=O_g/E_g."
+    },
+    {
+      "type": "p",
+      "text": "The information sets differed because prediction and comparison treat facility differences differently. Prediction uses facility information to identify risk, whereas regional comparison retains outcome differences after adjusting patient case mix. Provincial and facility reference probabilities q_i were therefore estimated with a separate LightGBM model largely restricted to clinical codes and calendar variables. Comparisons of non-COVID outcomes across periods additionally fixed the pre-pandemic model, ensuring a common historical risk relationship."
+    },
+    {
+      "type": "h2",
+      "text": "S1.3 Historical context and non-ARI facility profiles"
+    },
+    {
+      "type": "p",
+      "text": "Patient predictors included age and its recorded unit, sex, ethnicity, residence, diagnostic codes and infection type, admission calendar, facility attributes, and indicators of cross-province or cross-canton care. Recent epidemic context comprised ARI admissions, the COVID-19 share and mortality over the preceding three months, calculated nationally and for selected geographic levels. Recent facility ARI volume relative to the previous year described changes in admission scale. These variables were calendar-lagged. Historical deaths were grouped by admission month; information limitations arising from reporting delays are discussed in Section 6.4."
+    },
+    {
+      "type": "p",
+      "text": "Recent ARI context described epidemic conditions, whereas historical non-ARI records described more persistent service characteristics. For each facility group and target month, non-ARI records discharged during the preceding 12 months generated 18 profile variables. Seven service statistics comprised discharge volume, all-cause in-hospital mortality, deaths within 48 hours as a proportion of all deaths, mean length of stay capped at 60 days, the proportions aged 0–19 and at least 65, and the proportion receiving cross-canton care. Eleven diagnostic-chapter proportions completed the profile. Proportions were set to missing with fewer than 30 historical records; the early-death proportion additionally required at least ten deaths. Profiles in province-held-out evaluation used the same rules applied to local historical non-ARI data."
+    },
+    {
+      "type": "h2",
+      "text": "S1.4 Stratified calibration and nested fitting"
+    },
+    {
+      "type": "p",
+      "text": "Base learners were LightGBM [34] and XGBoost [35]. LightGBM used a learning rate of 0.05, 127 leaves, a minimum of 80 records per leaf and an L2 penalty of 5. XGBoost used a learning rate of 0.05, maximum depth 8, minimum child weight 5 and an L2 penalty of 5. Both used feature and row subsampling fractions of 0.8, up to 4,000 rounds, and early stopping on a stratified 10% training holdout with patience of 100 rounds. The equal-weight comparator additionally included TabM [4]. Member probabilities were averaged and then logistically recalibrated using internal held-out predictions."
+    },
+    {
+      "type": "p",
+      "text": "Equal weighting applies the same model combination to all patients, although children and COVID-19 patients occupy different risk ranges. To allow their combinations to differ, member probabilities were clipped to [10^−7, 1−10^−7], transformed to logits z_i^(m), and combined through logistic stacking with regularisation parameter C = 1000. The child indicator c_i and COVID-19 indicator v_i interacted with member scores to produce the stratified score in equation (S2)."
+    },
+    {
+      "type": "eq",
+      "latex": "z_i^A=\\alpha+\\sum_m a_mz_i^{(m)}+c_i\\left(b+\\sum_m b_mz_i^{(m)}\\right)+v_i\\left(d+\\sum_m d_mz_i^{(m)}\\right)."
+    },
+    {
+      "type": "p",
+      "text": "These interactions addressed prespecified age and infection strata, but systematic errors could remain across other registry variables within each stratum. Starting from stacking score z_i^A, a shallow residual function h was fitted using variables u_i comprising age, sex, ethnicity, urban or rural residence, sector, infection type, administering entity, facility class, province and month. This yielded the corrected score in equation (S3)."
+    },
+    {
+      "type": "eq",
+      "latex": "z_i^B=z_i^A+h(u_i,z_i^A)."
+    },
+    {
+      "type": "p",
+      "text": "The residual learner used 8 leaves, at least 1,000 records per leaf, a learning rate of 0.03, an L2 penalty of 20, and feature and row subsampling fractions of 0.8, with at most 500 rounds. Fifteen per cent of nested training records provided early stopping with patience of 30 rounds. In-distribution analyses included year; temporal extrapolation did not use unseen year categories."
+    },
+    {
+      "type": "p",
+      "text": "Residual learning primarily optimised record-level log loss. Because subsequent monitoring also aggregates expected deaths, an unpenalised logistic projection was fitted to the corrected score and specified marginal categories. Indicators g_k covered age group, sex, ethnicity, urban or rural residence, sector and infection type, with year added in the in-distribution configuration. Equation (S4) gives the resulting probability."
+    },
+    {
+      "type": "eq",
+      "latex": "p_i^H=\\sigma\\!\\left(\\beta_0+\\beta_1z_i^B+\\sum_k\\gamma_kg_k(i)\\right),\\quad\\sigma(s)=(1+e^{-s})^{-1}."
+    },
+    {
+      "type": "p",
+      "text": "When a finite maximum-likelihood solution exists and optimisation converges sufficiently, the category score equations imply approximately zero sums of g_k(i)(y_i−p_i^H). Predicted deaths therefore approach observed deaths in the corresponding marginal categories of the fitting sample. This provides an explicit aggregation target, whose held-out performance was evaluated on independent outer-fold records. Projection used all nested training rows and shared some outcomes with residual learning. The 15% holdout served only residual early stopping, not independent projection calibration."
+    },
+    {
+      "type": "p",
+      "text": "In-distribution evaluation used five stratified outer folds. For each outer test fold, one of the other four folds was held out in turn while the remaining three trained the base model, yielding nested predictions. The second layer was fitted on these predictions and applied to the outer test records. Each base learner therefore involved 20 outer–inner combinations. Historical context was precomputed by calendar before splitting, so national historical mortality features could contain outcomes from earlier months of held-out records. The protocol evaluates a retrospective setting with historical monitoring information, as discussed in Section 6.4."
+    },
+    {
+      "type": "h2",
+      "text": "S1.5 Monthly state updating"
+    },
+    {
+      "type": "p",
+      "text": "Group calibration established the development-period mapping, and temporal evaluation assessed its adaptation to later months. Base models used 2015–2021 data, the second layer used internal five-fold predictions from that period, and 2022–2023 formed the temporal test set. The vector phi_i = [1, z_i^H, v_i, c_i]^T contained an intercept, the original score, a COVID-19 indicator and a child indicator. Month-specific coefficients theta_t adjusted the mapping as in equation (S5)."
+    },
+    {
+      "type": "eq",
+      "latex": "\\operatorname{logit}(p_{i,t})=\\phi_i^\\top\\theta_t,\\quad\\theta_t=\\theta_{t-1}+\\varepsilon_t,\\quad\\varepsilon_t\\sim N(0,qI)."
+    },
+    {
+      "type": "p",
+      "text": "Each month was predicted using the previous month’s state, followed by a Laplace-approximation update once that month’s outcomes were available. Development used forward validation in 2018–2021 to compare three coefficient configurations and q values of 0.001, 0.01 and 0.1. Log loss selected the four-dimensional state with q = 0.1. Initial covariance was 0.05I, with at most 25 Newton iterations per update and convergence tolerance 10^−8. The simulation followed admission months retrospectively; internal records used for initialisation also contributed to projection fitting."
+    },
+    {
+      "type": "h2",
+      "text": "S1.6 Case-mix standardisation"
+    },
+    {
+      "type": "p",
+      "text": "Regional and facility comparisons used a separate LightGBM with age and its unit, sex, three- and four-character ICD codes, infection type, admission month, national historical epidemic context and year. Residence, ethnicity and facility attributes were excluded. Five-fold out-of-fold probabilities were followed by a common intercept and slope fitted to all out-of-fold predictions and outcomes, aligning overall observed and expected deaths. This step established an indirect standardisation reference and was not an independent assessment of predictive performance."
+    },
+    {
+      "type": "p",
+      "text": "With few admissions, a small number of deaths can produce large O/E fluctuations. A Gamma–Poisson empirical Bayes model stabilised comparisons across different count scales by shrinking less precise ratios towards the overall level, as specified in equation (S6)."
+    },
+    {
+      "type": "eq",
+      "latex": "O_g\\mid\\theta_g\\sim\\operatorname{Poisson}(E_g\\theta_g),\\quad\\theta_g\\sim\\operatorname{Gamma}(a,a),\\quad\\theta_g\\mid O_g,E_g\\sim\\operatorname{Gamma}(O_g+a,E_g+a)."
+    },
+    {
+      "type": "p",
+      "text": "The Gamma distribution used shape–rate parameterisation, with a estimated by marginal likelihood. The posterior mean was (O_g+a)/(E_g+a), and its 2.5th and 97.5th percentiles defined a 95% shrinkage interval. Provinces and facility groups required at least 300 admissions and five expected deaths; administering-entity and facility-class summaries required at least 500 admissions and five expected deaths. Groups with an interval lower bound above 1 were flagged as above reference. Intervals conditioned on fixed expected counts, did not propagate all uncertainty in model fitting or estimation of a, and were not adjusted for multiple screening comparisons."
+    },
+    {
+      "type": "h2",
+      "text": "S1.7 Non-COVID outcomes and demographic disparities"
+    },
+    {
+      "type": "p",
+      "text": "Non-COVID period comparisons used a clinical LightGBM trained only on 2015–2019 records, retaining age, sex, diagnosis and admission month but excluding year and epidemic context. Pre-pandemic out-of-fold predictions provided overall recalibration, after which the mapping was fixed. O−E measured the death difference from this historical case-mix reference; O/E intervals used Poisson count methods. Facility COVID-19 demand was proxied by current monthly COVID-19 admissions relative to the same facility’s pre-pandemic ARI baseline. This measures demand changes without a bed or staffing capacity denominator."
+    },
+    {
+      "type": "p",
+      "text": "Demographic comparisons successively reported crude mortality rate ratios, relative O/E after clinical case-mix adjustment, and relative O/E after additionally including facility location, class, sector and non-ARI profiles. For target group g and reference group r, the ratio is defined in equation (S7)."
+    },
+    {
+      "type": "eq",
+      "latex": "R_{g:r}=\\frac{O_g/E_g}{O_r/E_r}."
+    },
+    {
+      "type": "p",
+      "text": "Neither standardisation model directly included ethnicity, urban or rural residence, or cross-canton care indicators. Relative-ratio intervals used 400 record-level bootstrap samples without refitting risk models or clustering by facility or patient. Successive adjustments describe conditional associations, not causal mediation. In particular, adding sector-related predictors in public–private comparisons moves the comparison towards outcomes conditional on sector."
+    },
+    {
+      "type": "h2",
+      "text": "S1.8 Paediatric demand and interpretable risk groups"
+    },
+    {
+      "type": "p",
+      "text": "Monthly counts from 2015–2019 were fitted with a Poisson model containing seasonal terms and a log-population offset to estimate expected admissions and deaths from 2020 onwards. A linear time trend was added for sensitivity analysis. Parameter simulation and count sampling allowing overdispersion generated 2,000 predictive draws. Infant and age 1–4 analyses shared the population trajectory for ages 0–4 because separate series were unavailable, making fine age-specific estimates exploratory."
+    },
+    {
+      "type": "p",
+      "text": "A shallow tree with 14 leaves was fitted on 80% of records to describe where risk was concentrated. Mortality, admission shares and death shares for each phenotype were reported in the remaining 20%. The tree compressed risk patterns, and its data-driven age cut-offs differ from the prespecified paediatric definition of 0–19 years. Mortality-concentration curves compared the proportions of deaths captured when prioritising a given share of records, informing potential future manual review."
+    },
+    {
+      "type": "h2",
+      "text": "S1.9 Evaluation tasks and comparator configurations"
+    },
+    {
+      "type": "p",
+      "text": "Comparators comprised seven-variable logistic regression, LR-7 (age group, sex, ethnicity, urban or rural residence, public or private sector, infection type and year), an equal-weight LightGBM/XGBoost/TabM ensemble, EW, and HiCARE with facility profiles and stratified calibration. Legacy “reference LR” or “reference model” labels denote LR-7; “CARE v1” denotes EW. Component analyses assessed profiles, stratified stacking, residual correction, projection, year and a single-LightGBM configuration. Development, held-out evaluation and intended uses were distinguished following TRIPOD+AI [29]."
+    },
+    {
+      "type": "p",
+      "text": "Evaluation comprised five-fold in-distribution cross-validation, temporal holdout in 2022–2023 and six-fold province-grouped holdout. The latter compared ensembles without geographic identifiers. The no-profile configuration also removed regional and facility epidemic context; the profile configuration added non-ARI profiles. This protocol used equal-weight ensembling and recalibration, not the full HiCARE second layer. The no-profile configuration included LightGBM, XGBoost and TabM, whereas the profile configuration included LightGBM and XGBoost. Differences therefore involved both profiles and ensemble membership. The geographic HiCARE label is interpreted throughout as the geographic profile configuration."
+    },
+    {
+      "type": "p",
+      "text": "Discrimination used AUROC and AUPRC calculated as average precision; probability errors used Brier score and log loss. Calibration intercepts were estimated with slope fixed at 1 and had ideal value 0; ideal calibration slope was 1. ICI used weighted isotonic approximation over 200 predicted-risk quantile bins, and ECE used risk quantile bins. Subgroup O/E required at least 25 deaths and 25 survivors. Summaries reported sample-size-weighted mean and maximum absolute log(O/E). Worst-group ECE used ten quantile bins and required at least 5,000 records. Marginal groups could overlap, and these metrics do not represent every intersecting population."
+    },
+    {
+      "type": "p",
+      "text": "Decision curves measured net benefit as TP/N − FP/N × tau/(1−tau) at threshold tau. Concentration curves reported mortality coverage among prioritised records. Both assessed potential priority information without a prespecified clinical intervention or verified availability at admission. Paired bootstrap intervals resampled records, and the main training runs used a single random seed. The “best LR-7” in temporal testing was selected retrospectively from nine variants by test-period log loss, a comparison favourable to the baseline."
+    },
+    {
+      "type": "h1",
+      "text": "S2 Complete numerical results"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 1,
+      "analysis": "HiCARE components address distinct sources of risk information and probability error (Table S1). Facility profiles first extend the information available to base models. Stratified stacking then allows different score combinations for children and COVID-19 patients. Residual correction learns remaining errors associated with specified group variables, and marginal projection constrains fitted group-level totals. Monthly updating subsequently addresses shifts in later periods. Tables S4 and S5 assess within-period component gains and temporal maintenance, respectively.",
+      "note": "Marginal residual constraints apply to the projection fitting data and included categories. Historical-information boundaries are described in the main text.",
+      "caption": "Table S1. Inputs, operations and purposes of HiCARE components.",
+      "display": "S1"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 2,
+      "analysis": "The four-dimensional state with q = 0.1 achieved the lowest development log loss of 0.2561 and an ICI of 0.0048 (Table S2). Compared with updating a common intercept alone, adding the score slope and group offsets accommodated changes in both the risk scale and between-group relationships. This configuration was fixed for subsequent temporal testing and compared with static models and rolling windows to assess whether the development-period choice remained effective in 2022–2023.",
+      "note": "Configuration selection used 2018–2021 forward validation. The rolling-window row is a development comparator, not an additional test result.",
+      "caption": "Table S2. Development configurations for monthly state updating, evaluated by forward validation in 2018–2021 and selected by development-period log loss.",
+      "display": "S2"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 3,
+      "analysis": "In all-age cross-validation, HiCARE achieved an AUROC of 0.904 compared with 0.859 for LR-7, and log loss decreased from 0.1934 to 0.1701 (Table S3). Age-specific results showed that this improvement was not solely due to the large mortality difference between children and adults. Paediatric AUROC increased from 0.689 to 0.874 and AUPRC from 0.015 to 0.081; adult AUROC increased from 0.729 to 0.817. Expanded information and nonlinear modelling therefore improved risk identification within age strata, supporting review among comparable patients.\nThe advantage was much smaller against EW, whose all-age AUROC was already 0.903. The base ensemble had extracted most ranking information. HiCARE reduced ICI from 0.0021 to 0.0016, locating its incremental value more specifically in probability accuracy. Risk curves and group errors clarify the source of that increment.",
+      "note": "Geographic HiCARE denotes the profile ensemble configuration. Temporal EW uses a rolling window; matched state-updating comparisons are reported in Table S5.",
+      "caption": "Table S3. Performance of LR-7, EW and HiCARE under three evaluation protocols (random seed 0).",
+      "display": "S3"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 4,
+      "analysis": "After adding profiles, the equal-weight configuration achieved an AUROC of 0.9033, but mean subgroup absolute log(O/E) remained 0.0229 (Table S4). Adding useful risk information and correcting predicted group totals were therefore distinct steps. Stratified stacking, residual correction and marginal projection successively reduced mean error to 0.0126, 0.0089 and 0.0054 while AUROC stayed between 0.9035 and 0.9037. These steps primarily changed probability allocation within a similar ranking, bringing expected deaths closer to observed counts.\nRelative to the original EW, final mean error decreased by approximately 75.3%, maximum absolute log(O/E) decreased from 0.201 to 0.076, and AUROC increased by only 0.0009. Gains in probability aggregation exceeded gains in ranking. A single-LightGBM configuration achieved an AUROC of 0.9037 and log loss of 0.1701, retaining these gains with a simpler learner. Ensemble complexity was therefore not the principal determinant of performance in this comparison.",
+      "note": "Mean and maximum errors use 42 specified marginal groups. Worst-group ECE uses ten within-group risk quantile bins among groups meeting the sample-size criterion.",
+      "caption": "Table S4. Cross-validation results for facility profiles and calibration components. The final three columns summarise calibration in specified subgroups.",
+      "display": "S4"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 5,
+      "analysis": "Static HiCARE had an O/E of 0.66 in 2022–2023, indicating that the development-period mapping overpredicted later deaths (Table S5). A rolling window increased this ratio to 0.94 and monthly state updating to 0.93. State updating reduced ICI from 0.0196 to 0.0052 and log loss from 0.1220 to 0.1163, while AUROC changed only from 0.899 to 0.900. Maintenance principally adjusted the probabilities associated with existing scores rather than rebuilding their ranking.\nApplying the same state update to EW yielded the same log loss of 0.1163 and an ICI of 0.0051. Both models therefore identified changing probability scales as the main temporal problem. Periodic maintenance preserved discrimination while reducing systematic overprediction. LR-7 was closer to ideal on some calibration measures but had lower AUROC, again distinguishing probability scale from risk identification.",
+      "note": "",
+      "caption": "Table S5. Static, rolling-window and state-space updating configurations in all-age temporal testing in 2022–2023.",
+      "display": "S5"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 6,
+      "analysis": "Across populations and protocols, HiCARE or the corresponding profile configuration outperformed LR-7 in 95 of 117 comparisons, comprising 81 of 81 non-calibration comparisons and 14 of 36 calibration comparisons (Table S6). This contrast agrees with the individual analyses. Expanded models improved discrimination and related performance more consistently, whereas absolute probability accuracy depended more strongly on population and evaluation setting. In-distribution group correction, later-month updating and local recalibration therefore address different needs. The 117 comparisons share records and metric information and describe a performance pattern rather than 117 independent pieces of evidence.",
+      "note": "Temporal LR-7 was selected by test-period log loss. Protocol-specific HiCARE configurations are defined in Section S1.9.",
+      "caption": "Table S6. Comparison with LR-7 across 13 metrics. Temporal evaluation uses the best of nine LR-7 variants selected by test log loss.",
+      "display": "S6"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 7,
+      "analysis": "After case-mix adjustment, shrunk mortality ratios across 24 provinces still ranged from 0.61 to 1.56. The 95% interval was above 1 in ten provinces and below 1 in nine (Table S7). Age, diagnosis and calendar characteristics explained some variation without making provincial outcomes uniform. Residual differences provide starting points for examining severity, referrals and registry quality.\nThe same overall ratio could also conceal different temporal and age patterns. High mortality in El Oro was chiefly an adult finding, with a paediatric ratio of 0.85. In Sucumbíos, paediatric and adult ratios were 1.43 and 1.46. Although both provinces had high overall ratios, the populations requiring attention differed. Standardisation thus refined national mortality rankings into geographically and demographically defined review targets.",
+      "note": "",
+      "caption": "Table S7. Case-mix-standardised in-hospital mortality ratios by hospital province, with empirical Bayes shrinkage. Expected deaths come from the clinical case-mix model. The final five columns show shrunk ratios by period and age stratum.",
+      "display": "S7"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 8,
+      "analysis": "Case-mix adjustment reduced between-province standard deviation on the ratio scale from 0.32 to 0.24, approximately one quarter (Table S8). The corresponding facility-group value decreased from 1.07 to 0.81, although included groups changed from 240 to 239. At both levels, patient composition was an important source of outcome variation. Residual variation and changes in high- and low-ratio lists show that standardisation changed both the magnitude of ratios and which units warranted review. Finer facility-level comparisons also require additional severity and referral information.",
+      "note": "",
+      "caption": "Table S8. Standardised mortality variation across aggregation levels and adjustment sets. Between-unit standard deviation is the standard deviation of unit effects on the ratio scale under the Gamma prior.",
+      "display": "S8"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 9,
+      "analysis": "Facility-class comparisons revealed a particularly strong case-mix effect (Table S9). Children’s hospitals had a crude ratio of approximately 0.20 but an adjusted ratio of 2.06. The low crude value primarily reflected their low-baseline-risk paediatric population. Against patients of similar age and diagnostic composition, observed deaths exceeded model expectations. This reversal directs attention to critical referrals and unrecorded severity in specialist paediatric facilities, rather than judging outcomes from the all-age crude ratio.\nAdjusted differences also remained by administering entity, with O/E of 1.27 in Ministry of Public Health facilities, 0.87 in IESS facilities and 0.73 in for-profit private facilities. Different service responsibilities may imply unrecorded severity differences. These results therefore provide strata for investigating care pathways rather than direct attribution to ownership.",
+      "note": "",
+      "caption": "Table S9. Standardised mortality ratios by administering entity and facility class.",
+      "display": "S9"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 10,
+      "analysis": "Against the fixed pre-pandemic case-mix reference, 3,485 non-COVID ARI deaths were observed in 2020–2021 versus 2,108 expected, yielding O/E of 1.65 (95% interval 1.60–1.71) and a difference of approximately 1,377 deaths (Table S10). Ratios were 1.64 in adults and 1.89 in children, indicating departures in both age strata. Overall O/E returned to 0.97 in 2022–2023, locating the main change in the early pandemic.\nThe fixed reference retained both deterioration and subsequent decline relative to a common pre-pandemic risk relationship. It identified a period for investigating non-COVID admission and referral processes. Differences may still include admission selection, unrecorded severity and missed COVID-19 diagnoses, motivating further analysis alongside facility demand.",
+      "note": "",
+      "caption": "Table S10. Observed non-COVID ARI deaths compared with predictions from a clinical case-mix model fitted in 2015–2019. Predictions for the fitting period are out of fold.",
+      "display": "S10"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 11,
+      "analysis": "Facility-month strata showed higher adult non-COVID mortality departures alongside greater COVID-19 demand (Table S11). O/E was 0.92 without COVID-19 demand, 1.19 at demand ratios of 0–0.5, and 2.52 at ratios of 1–2. The two higher groups had ratios of 2.41 and 2.34. Mortality remained high in high-demand groups but did not rise further above the 1–2 category, suggesting a plateau rather than strict linear growth.\nThis pattern located the national period difference in Table S10 more specifically in high-demand facility-months, suggesting investigation of bed turnover, staffing and referral processes. Some paediatric strata contained only six deaths and had wider intervals, leaving that association less stable. The historical ARI denominator measures relative admission scale, not a capacity-saturation threshold.",
+      "note": "The demand denominator is pre-pandemic ARI admissions. Ratios do not measure bed occupancy, staff workload or capacity thresholds.",
+      "caption": "Table S11. Case-mix-adjusted mortality among non-COVID ARI admissions from March 2020 to December 2021, stratified by contemporaneous facility-group COVID-19 demand. Demand is COVID-19 admissions divided by mean monthly ARI admissions in the same group in 2015–2019.",
+      "display": "S11"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 12,
+      "analysis": "Sequential adjustment showed how population differences changed when case mix and care setting were included (Table S12). The adult Indigenous-to-Mestizo ratio increased from 0.60 unadjusted to 0.78 after clinical adjustment and 1.01 after facility adjustment. The initially lower mortality therefore depended on the patient and care conditions used for comparison. Paediatric differences persisted under the same adjustment, with ratios of 1.25 for rural versus urban residence and 1.32 for Indigenous versus Mestizo ethnicity.\nThe cross-canton care ratio in children decreased from 3.99 to 2.55. Clinical and facility information explained part of the association, but these records remained concentrated at higher risk. Divergent adult and paediatric adjustment trajectories limit all-age summaries. Combining age strata and facility information directs investigation towards severity and referral pathways among rural, Indigenous and cross-canton paediatric admissions.",
+      "note": "",
+      "caption": "Table S12. Crude demographic mortality rate ratios, clinical case-mix-standardised relative ratios and ratios additionally adjusted for care setting, with 95% bootstrap intervals. The final column reports deaths within 48 hours as a proportion of all in-hospital deaths in target and reference groups.",
+      "display": "S12"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 13,
+      "analysis": "Paediatric non-COVID admissions declined markedly before recovering (Table S13). Admissions from March 2020 to December 2021 were 0.27 times the fixed seasonal benchmark, returning to 0.99 in 2022 and 1.32 in 2023. The 2023 death-count ratio was 1.00 (95% prediction interval 0.84–1.19), so increased admissions did not entail a proportional increase in deaths. Service preparation therefore requires separate volume monitoring, while mortality surveillance continues to track case mix and outcomes.\nThe estimated recovery depended on baseline extrapolation. Including a long-term trend reduced the 2023 admission ratio from 1.32 to 1.11, with a prediction interval of 0.97–1.27. The firmer conclusion is clear recovery from the early-pandemic trough; the extent above a continuation of historical trends remains assumption-dependent. Age and syndrome strata locate the populations driving recovery.",
+      "note": "Infants and children aged 1–4 share the population trajectory for ages 0–4. Trend-adjusted ratios are a sensitivity analysis.",
+      "caption": "Table S13. Non-COVID ARI admissions relative to a pre-pandemic seasonal counterfactual. Monthly Poisson models fitted in 2015–2019 included population offsets, with prediction intervals from simulations allowing overdispersion. The final column adds a log-linear trend for sensitivity analysis.",
+      "display": "S13"
+    },
+    {
+      "type": "exhibit",
+      "kind": "table",
+      "n": 14,
+      "analysis": "The shallow tree compressed risk into 14 readable phenotypes. In the 20% holdout, the seven highest-risk groups comprised approximately 14% of admissions and captured 53% of deaths (Table S14). Deaths were therefore concentrated in a relatively small subset of patient combinations, informing the allocation of limited review capacity. The highest-risk phenotype comprised COVID-19 patients older than 86 admitted in 2020–2021 to specified facility classes, with mortality of 49.4%. Risk was jointly defined by age, infection, period and facility conditions; age or diagnosis alone would miss part of this structure.",
+      "note": "Leaf age thresholds were learned from the data. The age ≤18 leaf differs from the prespecified paediatric stratum of ages 0–19.",
+      "caption": "Table S14. Risk phenotypes evaluated in the held-out 20% of the cohort.",
+      "display": "S14"
+    },
+    {
+      "type": "h1",
+      "text": "S3 Supplementary figures and interpretation"
+    },
+    {
+      "type": "exhibit",
+      "kind": "figure",
+      "n": 3,
+      "analysis": "Nested fitting supplies the second layer with base predictions for records not directly used to train those predictors (Figure S1). This resembles applying score correction to new records and reduces optimism from using fitted training probabilities. Configurations were compared on the same outer records, allowing Table S4 to assess changes after each calibration step. The design isolates direct fitting; historical-information availability remains governed by Section S1.4.",
+      "note": "Nested predictions isolate direct base-learner training records. Historical information boundaries are described in Section S1.4.",
+      "caption": "Figure S1. Nested cross-fitting to generate second-layer training data for one outer test fold.",
+      "display": "S1"
+    },
+    {
+      "type": "exhibit",
+      "kind": "figure",
+      "n": 16,
+      "analysis": "Figure S2 disaggregates performance by population and protocol. Advantages in ranking and related metrics were widespread, whereas calibration differences varied across tasks without a consistent direction. Relative risk relationships transferred more readily than absolute probability levels. Monthly updating and local intercept checks therefore address probability maintenance in different monitoring environments. These tasks support organising evaluation by error source rather than summarising performance with a single all-age metric.",
+      "note": "Geographic evaluation concerns the profile ensemble configuration. Colours denote differences from LR-7; stars and symbols denote statistical significance and changes relative to EW, as defined in the legend.",
+      "caption": "Figure S2. Comparisons across 13 metrics, three populations and three evaluation protocols.",
+      "display": "S2"
+    },
+    {
+      "type": "exhibit",
+      "kind": "figure",
+      "n": 20,
+      "analysis": "Among 239 eligible facility groups, 49 had shrinkage intervals above the reference, 144 below it and 46 without a clear departure (Figure S3). High-ratio groups accounted for approximately 8,629 more observed than expected deaths, locating national departures in a limited number of service units. The funnel plot also shows wider random variation at lower expected counts. Combining counts with shrinkage estimates helps prioritise large, well-supported departures. These units combine administrative and facility attributes and must still be linked to individual hospitals for investigation.",
+      "note": "Funnel control limits and empirical Bayes intervals have different statistical definitions. Facility groups combine administrative and institutional attributes and are not necessarily individual hospitals.",
+      "caption": "Figure S3. Funnel plot of standardised mortality in facility groups.",
+      "display": "S3"
+    },
+    {
+      "type": "exhibit",
+      "kind": "figure",
+      "n": 21,
+      "analysis": "The direction of movement from crude to standardised ratios differed by administering entity and facility class, most conspicuously for children’s hospitals (Figure S4). Case mix did not affect every facility type by a common multiplier, making national crude mortality an inadequate shared benchmark. This explains the two treatments of facility information. Prediction uses profiles to supplement patient records, whereas comparison first creates a common patient case-mix reference and examines the facility differences that remain. The former enriches risk description; the latter locates outcome departures requiring explanation.",
+      "note": "",
+      "caption": "Figure S4. Standardised mortality by administering entity and facility class.",
+      "display": "S4"
+    },
+    {
+      "type": "exhibit",
+      "kind": "figure",
+      "n": 24,
+      "analysis": "At provincial scale, cumulative COVID-19 demand was not positively associated with non-COVID mortality ratios (r = −0.19, p = 0.37; Figure S5), unlike the facility-month pattern in Table S11. Co-occurrence of high contemporaneous facility demand and mortality departures therefore does not imply higher non-COVID ratios in provinces with more cumulative COVID-19 admissions. Provincial totals combine facilities, epidemic peaks and admission selection and describe a different quantity from monthly care processes. Interpretation should remain at the corresponding scale, with provincial mortality differences investigated using local service and registry information.",
+      "note": "",
+      "caption": "Figure S5. Provincial non-COVID mortality departures from the historical reference during the pandemic. (A) Ratios and 95% intervals. (B) Association with cumulative provincial COVID-19 demand.",
+      "display": "S5"
+    },
+    {
+      "type": "exhibit",
+      "kind": "figure",
+      "n": 31,
+      "analysis": "Mortality differences between phenotypes demonstrate the discrimination of shallow rules (Figure S6). The age ≤18 leaf accounted for approximately 51.0% of admissions and 3.6% of deaths, with mortality of 0.5%. The leaf for patients older than 86 with early-pandemic COVID-19 in specified facility classes had mortality of 49.4%. These rules translate complex risk relationships into inspectable patient combinations, supporting stratified review. Because risk still varies within each phenotype, rules primarily aid interpretation, while continuous scores provide finer priorities.",
+      "note": "",
+      "caption": "Figure S6. Deaths per 100 admissions in 14 risk-tree leaves evaluated on held-out data.",
+      "display": "S6"
+    },
+    {
+      "type": "h1",
+      "text": "S4 Extended interpretation of main-text figures"
+    },
+    {
+      "type": "p",
+      "text": "The following sections retain stratified interpretations, comparison conditions and additional numerical details in main-text figure order. The main text integrates these findings into a continuous argument; this section clarifies the scope of each analysis."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 1. Risk estimation and independent population monitoring."
+    },
+    {
+      "type": "p",
+      "text": "Figure 1 connects individual risk estimation with population comparisons. The prediction branch combines registry and historical facility information into scores, then uses group correction and monthly maintenance to estimate current probabilities. The independent branch constructs expected values for specific comparisons. Regional analyses adjust case mix, non-COVID period comparisons retain the pre-pandemic relationship, and paediatric demand analyses extrapolate seasonal counts. These distinct references allow individual ranking, mortality departures and admission demand to be interpreted on clearly defined scales."
+    },
+    {
+      "type": "small",
+      "text": "Facility profiles comprise seven service statistics and eleven diagnostic-composition variables. Population standardisation uses independent models."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 2. Facility profiles. (A) Mean non-ARI profiles by facility class. (B) Facility-group non-ARI all-cause mortality versus ARI mortality."
+    },
+    {
+      "type": "p",
+      "text": "Non-ARI age composition, length of stay and diagnostic-chapter proportions differed by facility class, indicating distinct service responsibilities (Figure 2A). The relationship between non-ARI all-cause mortality and ARI mortality connected these service differences to the target outcome (Figure 2B). Facilities serving complex cases or receiving cross-region referrals may retain similar characteristics across disease groups. Non-ARI profiles thus supplement ARI records with limited clinical fields. Their predictive role is examined further through attribution and province-held-out evaluation."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 3. HiCARE stratified calibration, temporal updating and evaluation protocols."
+    },
+    {
+      "type": "p",
+      "text": "Figure 3 maps base learners, three calibration steps and monthly maintenance to their respective evaluation protocols. Base and second-layer hyperparameters are detailed in Section S1.4, the four-dimensional update in S1.5, and comparators and metric conditions in S1.9. The schematic describes fitting steps without adding experimental results. Equation (2) combines the stacking interaction terms and is equivalent to equation (S2). Monthly states are used only for temporal maintenance, not in-distribution evaluation. The province protocol evaluates a separate profile ensemble configuration."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 4. Cross-validated (A) receiver operating characteristic and (B) precision–recall curves."
+    },
+    {
+      "type": "p",
+      "text": "HiCARE and EW were close across most thresholds, while both remained separated from LR-7 within age strata (Figure 4). Consistent with Table S3, expanded models provided a stable ranking advantage for high-risk records. In children, this was especially evident in precision–recall curves. With paediatric mortality of only 0.53%, AUPRC nevertheless remained low. The improvement concerns preferentially identifying deaths among many survivors; the required review volume still depends on the target recall."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 5. Cross-validated calibration in 20 predicted-risk quantile bins on logarithmic axes."
+    },
+    {
+      "type": "p",
+      "text": "Age-specific curves show how ranking gains translated to probabilities (Figure 5). HiCARE ICI was 0.0006 in children and 0.0033 in adults, with predictions generally close to observed frequencies across both risk ranges. Lower paediatric absolute error partly reflects lower baseline mortality, requiring examination of low-probability departures on logarithmic axes. Adult curves cover a broader range and describe probability agreement at moderate and high risk. Stratification makes both error patterns visible before group-level expected totals are assessed."
+    },
+    {
+      "type": "small",
+      "text": "The 20 bins are for visualisation. Tabulated ICI uses a 200-bin isotonic approximation; the two are not the same numerical estimator."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 6. Cross-validated decision curves."
+    },
+    {
+      "type": "p",
+      "text": "Across the thresholds in Figure 6, HiCARE and EW had broadly similar net benefit and generally exceeded LR-7. Under the displayed false-positive cost assumptions, improved ranking could therefore support more favourable screening. Their small difference also agrees with their similar ROC and precision–recall curves. Registry review can use workload and false-positive costs to identify candidate thresholds. Figure 26 further displays review proportions against mortality coverage."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 7. Contributions of facility profiles and second-layer components in cross-validation."
+    },
+    {
+      "type": "p",
+      "text": "Sequential correction revealed a trade-off between group totals and within-group probabilities (Figure 7). Marginal projection reduced maximum absolute log(O/E) from 0.166 to 0.076, while worst-group ECE increased from 0.0050 to 0.0059. Projection directly constrains average group residuals, primarily improving predicted death totals. Within the same group, underprediction and overprediction can still cancel, explaining lower total error alongside slightly greater within-group error."
+    },
+    {
+      "type": "p",
+      "text": "LR-7 illustrates the same distinction. Its mean marginal error was only 0.0006, yet worst-group ECE was 0.0183, compared with 0.0059 for HiCARE. Accurate group means can coexist with weak within-group risk characterisation. HiCARE preserved stronger ranking while lowering errors in specified group totals, providing complementary probability support for individual stratification and population aggregation."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 8. Observed-to-expected mortality in 42 specified marginal subgroups in cross-validation."
+    },
+    {
+      "type": "p",
+      "text": "Disaggregating the mean error across 42 marginal groups shows which predicted totals changed (Figure 8). Relative to EW, HiCARE reduced O/E departures in the most affected groups. LR-7 also approached 1 in some categories, consistent with their inclusion as model predictors. Together with Figure 7, this distinguishes accurate marginal means from sufficient within-group discrimination. For monitoring based on summed probabilities, Figure 8 evaluates the former; risk curves and within-group ECE assess complementary properties."
+    },
+    {
+      "type": "small",
+      "text": "The 42 groups are defined by age, sex, ethnicity, urban or rural residence, sector, infection type and year. They are neither disjoint populations nor all possible intersections."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 9. Paired bootstrap differences between HiCARE and the reference model in cross-validation."
+    },
+    {
+      "type": "p",
+      "text": "Paired bootstrap results retained the direction of HiCARE’s ranking advantage over LR-7 under record resampling (Figure 9). AUROC and AUPRC difference intervals were above zero for all ages, children and adults, and log-loss intervals were below zero. Improvements therefore included discrimination and probability loss. AUROC gains were approximately 0.185 in children and 0.088 in adults, consistent with Table S3."
+    },
+    {
+      "type": "p",
+      "text": "Calibration followed a different pattern. All-age and adult ICI decreased, while the paediatric difference was close to zero because LR-7 already had small absolute calibration error in low-risk children. Large ranking gains with limited ICI change indicate better differentiation of risk within children without a comparable change in average probability error. As in Table S4, risk identification and group calibration require separate interpretation."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 10. TreeSHAP attribution. (A) Leading features. (B) Attribution shares by feature group. (C) Historical facility non-ARI mortality and attribution."
+    },
+    {
+      "type": "p",
+      "text": "Facility profiles accounted for approximately 12% of total SHAP attribution, with non-ARI all-cause mortality among the leading features (Figure 10). The model therefore used historical information beyond demographics and ARI diagnoses. Alongside the service differences in Figure 2, attribution suggests that profiles may capture service level, referral reach and case complexity. Historical non-ARI mortality should consequently be understood as a proxy for risk context rather than a facility-quality score. Attribution describes information use by the fitted model; performance in new regions is assessed in Section 4.6."
+    },
+    {
+      "type": "small",
+      "text": "The combined profile group contains 18 service-statistic and diagnostic-composition features."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 11. Bimonthly observed-to-expected mortality in 2022–2023 under static prediction, rolling windows and state-space recalibration."
+    },
+    {
+      "type": "p",
+      "text": "Bimonthly O/E curves showed persistent temporal departure with static models, while rolling and state updating brought most windows closer to 1 (Figure 11). This located the full-period gains in Table S5 in specific months, showing reduced accumulation of total-count error. COVID-19 subgroup changes did not fully match the all-age pattern, making a single common correction insufficient. Separate COVID-19 and child offsets allowed the monthly state model to respond to group-specific changes."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 12. State-space recalibration in 2018–2023 using annual forward prediction from models fitted on preceding years. (A–D) Coefficients and 95% interval bands. (E) O/E. (F) Configuration selection in development years."
+    },
+    {
+      "type": "p",
+      "text": "In annual forward evaluation, the COVID-19 offset changed from approximately +0.49 in 2020 to −0.53 in 2022 and −0.60 in 2023 (Figure 12). The same base score required probability corrections in opposite directions. Static O/E changed from 3.09 to 1.01 after updating in 2020, and from 0.72 to 0.95 in 2022, respectively reducing early underprediction and later overprediction."
+    },
+    {
+      "type": "p",
+      "text": "These reversals explain why a fixed intercept may not remain adequate and why monthly maintenance should retain population-specific offsets. State coefficients summarise changes in the risk mapping arising from admission selection, treatment, coding and unrecorded severity. They locate groups and periods requiring maintenance, but identifying clinical causes requires more detailed information."
+    },
+    {
+      "type": "small",
+      "text": "This figure uses annual forward fitting and monthly updating in 2018–2023. Table S5 instead uses fixed development in 2015–2021 and testing in 2022–2023."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 13. Transfer to unseen provinces with and without facility profiles."
+    },
+    {
+      "type": "p",
+      "text": "After geographic identifiers were removed, the profile configuration increased province-held-out AUROC from 0.8654 to 0.8750 and reduced log loss from 0.1913 to 0.1876 (Figure 13). Historical service statistics were therefore associated with better risk identification in unseen provinces. This extends the information use shown in Figure 10 from the training distribution to geographic transfer."
+    },
+    {
+      "type": "p",
+      "text": "Meanwhile, the calibration intercept shifted from −0.004 to +0.171, indicating overall risk underprediction with profiles. Service representations can carry relative risk information while still requiring local probability adjustment. Because ensemble membership also changed, differences reflect the entire configuration; support for facility representations must be interpreted within that comparison."
+    },
+    {
+      "type": "small",
+      "text": "The geographic HiCARE label denotes the profile ensemble without the full second layer. Local historical non-ARI information was available during evaluation."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 14. Provincial (A) AUROC and (B) observed-to-expected mortality when each province is excluded from direct model training."
+    },
+    {
+      "type": "p",
+      "text": "The profile configuration exceeded LR-7 in AUROC in 23 of 24 provinces, showing that its ranking advantage was not confined to a few regions (Figure 14). Median provincial absolute log(O/E) decreased from 0.18 without profiles to 0.15 with profiles; LR-7 had a value of 0.23. Predicted total-count errors therefore improved in the typical province."
+    },
+    {
+      "type": "p",
+      "text": "Improvement in the provincial median can coexist with the national intercept departure in Figure 13. The former describes the centre of the provincial error distribution; the latter depends jointly on admission volumes and case mix. The transfer result is therefore best characterised as widespread ranking improvement, with probabilities requiring checks both nationally and within each province."
+    },
+    {
+      "type": "small",
+      "text": "Provinces were excluded from direct fitting, but precomputed national historical context could include their past outcomes. This is not external validation wholly free of local label information."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 15. Provincial case-mix-standardised in-hospital mortality ratios, with empirical Bayes estimates and 95% intervals; vertical tick marks indicate crude ratios."
+    },
+    {
+      "type": "p",
+      "text": "Case-mix adjustment materially changed provincial ordering (Figure 15). Sucumbíos increased from a crude ratio of 1.06 to 1.47, and Esmeraldas from 1.01 to 1.26. Near-average crude mortality therefore concealed higher mortality relative to their case mix. El Oro decreased from 1.79 to 1.56, indicating that higher-risk admissions explained part, but not all, of its departure. Opposing adjustment directions show that a common crude reference can both exaggerate and conceal differences, changing investigative priorities after standardisation."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 16. Observed minus expected in-hospital deaths by province, 2015–2023."
+    },
+    {
+      "type": "p",
+      "text": "Provinces with the strongest relative departures did not necessarily involve the most death records (Figure 16). Sucumbíos had a ratio of 1.47 and a difference of approximately 156 deaths; Guayas had a ratio of 1.11 but a difference of approximately 770, nearly five times larger. High admission volumes can make modest relative departures consequential in absolute numbers. Differences of approximately 1,276 in El Oro and 705 in Manabí combined relative departure with large scale. Reporting O/E beside O−E accommodates both. The approximately 3,932 deaths above expectation across high-ratio provinces are differences from a model reference, not avoidable deaths."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 17. Standardised mortality ratios by province, period and age stratum."
+    },
+    {
+      "type": "p",
+      "text": "Period stratification separated persistent from temporary departures (Figure 17). El Oro had ratios of 1.20, 1.68 and 1.51 across the three periods, remaining high after the pandemic. Esmeraldas increased from 0.89 to 1.49 before returning to 1.01. The former suggests examination of persistent case and service characteristics, while the latter concentrates attention on 2020–2021. El Oro also had an adult ratio of 1.59 versus 0.85 in children. Combined with Figures 15 and 16, these strata locate regional signals in particular periods and populations, improving the specificity of subsequent record review."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 18. Quarterly non-COVID ARI mortality O/E (left) and facility COVID-19 demand strata (right), with March 2020–December 2021 shaded."
+    },
+    {
+      "type": "p",
+      "text": "Quarterly curves located non-COVID mortality departures in the pandemic, while demand strata showed higher O/E in high-demand facility-months (Figure 18). The first identifies when departures occurred; the second narrows which service units require examination during that period. Together with the plateau among high-demand groups in Table S11, the findings suggest context-specific changes rather than a common linear demand effect across units. Subsequent investigations should preserve the facility-month scale."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 19. Monthly (A) COVID-19 admissions, (B) non-COVID ARI admissions and (C) observed-to-expected mortality among non-COVID admissions."
+    },
+    {
+      "type": "p",
+      "text": "Non-COVID admissions fell during the pandemic while O/E rose (Figure 19). Admission volume and mortality among admitted patients therefore describe different quantities. Changes in admission thresholds, attendance by mild cases and referral composition can concentrate risk in fewer registered patients. Residual departures after case-mix adjustment require investigation of factors incompletely captured in the records. Tracking admissions alongside standardised mortality avoids equating lower admission volume with lower demand or outcome burden."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 20. Sequentially adjusted relative mortality ratios (left) and deaths within 48 hours as a proportion of deaths (right)."
+    },
+    {
+      "type": "p",
+      "text": "Death timing provided an additional clue to paediatric differences (Figure 20). Among children who died, approximately 45% of Indigenous children died within 48 hours compared with 21% of Mestizo children; proportions were approximately 29% for rural and 21% for urban children. Higher adjusted mortality co-occurred with more concentrated early deaths, directing attention to severity at arrival, pre-hospital illness and referrals. Early-death proportions describe timing among deaths and cannot distinguish severity from delay, but can narrow the information needed for review."
+    },
+    {
+      "type": "small",
+      "text": "Sequential adjustment estimates relative mortality under different conditioning sets. In public–private comparisons, ratios approaching 1 after inclusion of sector-related variables do not establish a causal explanation."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 21. Age-specific paediatric non-COVID ARI admissions relative to the pre-pandemic seasonal counterfactual."
+    },
+    {
+      "type": "p",
+      "text": "Recovery was concentrated at ages 1–9 (Figure 21). In 2023, admission ratios were 1.54 at ages 1–4 and 2.03 at ages 5–9, compared with 1.10 in infants and 1.06 at ages 10–19. The aggregate increase therefore did not imply proportional growth across ages, directing particular attention to preschool and younger school-age children. The cumulative paediatric ratio from March 2020 to 2023 was still 0.73, showing that high late-period admissions coexisted with fewer admissions across the entire period. Annual recovery and cumulative burden require separate interpretation."
+    },
+    {
+      "type": "small",
+      "text": "Expected infant and age 1–4 counts use the same population trend for ages 0–4. Intervals are predictive intervals around the seasonal benchmark."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 22. Quarterly observed-to-expected non-COVID ARI admission ratios by age, 2019–2023."
+    },
+    {
+      "type": "p",
+      "text": "Quarterly decomposition showed age differences in the pace of recovery (Figure 22). All paediatric groups remained below seasonal baseline in early 2022, but age 1–4 and age 5–9 ratios reached 1.71 and 1.58 in the second quarter. Ages 5–9 remained high throughout 2023 and reached 2.29 in the second quarter, whereas infants were still at 0.73 in the first quarter. Sustained growth among older children thus coexisted with seasonal infant fluctuations. Annual totals obscure this concentration; quarterly or monthly information can support the evaluation of staffing and bed preparation."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 23. Syndrome-specific rebound and age shifts among admissions in children under 5."
+    },
+    {
+      "type": "p",
+      "text": "Syndrome strata connected age shifts to diagnostic categories (Figure 23). Pneumonia admissions at ages 1–4 in 2023 were approximately 1.64 times the fixed baseline, and the proportion aged at least 1 among under-5 pneumonia admissions increased from approximately 62% to 72%. Recovery was therefore concentrated beyond infancy, consistent with the age 1–4 increase in Figure 21. Separate series for pneumonia in older children and infant bronchiolitis are needed to describe recovery in these distinct populations."
+    },
+    {
+      "type": "small",
+      "text": "Age-specific expected counts are affected by approximate population denominators. Composition percentages describe observed admissions in the registry."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 24. Monthly distributions of paediatric admissions before the pandemic and in 2022 and 2023."
+    },
+    {
+      "type": "p",
+      "text": "Syndromes also differed in peak timing (Figure 24). Before the pandemic, pneumonia at ages 1–9 was concentrated in January–February and infant bronchiolitis in February–March. Both peaks shifted to May–June in 2022. In 2023, the correlation with the pre-pandemic monthly distribution recovered to 0.83 for pneumonia but only 0.44 for bronchiolitis, indicating different degrees of seasonal recovery. Aggregating all paediatric respiratory admissions could conceal this timing difference. Alongside evidence of regional seasonality in Ecuador [20], these results support syndrome-specific local demand windows."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 25. Paediatric non-COVID ARI admissions in 2023 relative to provincial pre-pandemic seasonal incidence."
+    },
+    {
+      "type": "p",
+      "text": "Recovery also varied geographically (Figure 25). In 2023, ten provinces exceeded their own seasonal reference and two fell below it. Ratios were 2.47 in Bolívar, 1.95 in Pichincha, 1.90 in Zamora Chinchipe and 1.70 in Loja, compared with approximately 1.03 in Guayas. The national ratio of 1.32 therefore did not represent a common provincial change. Pichincha combined a high ratio with large admission volume, whereas Bolívar had stronger relative growth from a smaller baseline. As in regional mortality investigation, preparation should combine relative changes and local counts before linking them to length of stay and capacity."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 26. Mortality coverage against admission-review proportion when records are ranked by predicted risk."
+    },
+    {
+      "type": "p",
+      "text": "Continuous scores captured more deaths at the same review proportion. HiCARE and EW curves were close, generally above LR-7, and all-age curves exceeded ranking by 14 phenotypes (Figure 26). This translates discrimination into an interpretable review workload. Shallow phenotypes describe patient categories, whereas continuous scores refine priorities within categories. Age-specific curves confirm that gains do not arise solely from adult–child risk differences. Coverage measures retrospective screening ability. Practical evaluation should choose review proportions according to capacity and record the problems identified and subsequent outcomes."
+    },
+    {
+      "type": "h2",
+      "text": "Figure 27. Observed deaths per 100 admissions by age, infection group and period, with 95% interval bands."
+    },
+    {
+      "type": "p",
+      "text": "Age-risk curves varied by infection and period, explaining why fixed phenotype rules require maintenance (Figure 27). Adult non-COVID pneumonia mortality was high in 2020–2021, whereas COVID-19 mortality declined in 2022–2023. The same age therefore did not imply a common death probability across infections and periods. This agrees with the reversal in COVID-19 offsets in Figure 12 and provides population-level support for infection-specific probability maintenance. Age remained an important stratifier, but its probability scale required interpretation in the current infection mix and period."
+    }
+  ]
+}

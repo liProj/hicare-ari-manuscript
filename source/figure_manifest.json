@@ -1,0 +1,167 @@
+[
+  {
+    "n": 2,
+    "file": "x01_architecture.pdf",
+    "label": "fig:arch"
+  },
+  {
+    "n": 3,
+    "file": "x02_nested_scheme.pdf",
+    "label": "fig:nested"
+  },
+  {
+    "n": 4,
+    "file": "x03_provider_profiles.pdf",
+    "label": "fig:profiles"
+  },
+  {
+    "n": 5,
+    "file": "x04_roc_pr.pdf",
+    "label": "fig:rocpr"
+  },
+  {
+    "n": 6,
+    "file": "x05_calibration.pdf",
+    "label": "fig:calib"
+  },
+  {
+    "n": 7,
+    "file": "x06_decision_curves.pdf",
+    "label": "fig:dca"
+  },
+  {
+    "n": 8,
+    "file": "t2_layer_contributions.pdf",
+    "label": "fig:layers"
+  },
+  {
+    "n": 9,
+    "file": "t1_subgroup_calibration.pdf",
+    "label": "fig:subcal"
+  },
+  {
+    "n": 10,
+    "file": "x08_bootstrap_forest.pdf",
+    "label": "fig:boot"
+  },
+  {
+    "n": 11,
+    "file": "x10_shap_profiles.pdf",
+    "label": "fig:shapv2"
+  },
+  {
+    "n": 12,
+    "file": "t3_dynamic_recalibration.pdf",
+    "label": "fig:dyn"
+  },
+  {
+    "n": 13,
+    "file": "x09_state_trajectory.pdf",
+    "label": "fig:traj"
+  },
+  {
+    "n": 14,
+    "file": "t4_geographic_profiles.pdf",
+    "label": "fig:geoprof"
+  },
+  {
+    "n": 15,
+    "file": "x11_geo_by_province.pdf",
+    "label": "fig:geoprov"
+  },
+  {
+    "n": 16,
+    "file": "x07_winloss.pdf",
+    "label": "fig:winmap"
+  },
+  {
+    "n": 17,
+    "file": "m1_province_smr.pdf",
+    "label": "fig:prov"
+  },
+  {
+    "n": 18,
+    "file": "x13_excess_deaths.pdf",
+    "label": "fig:excess"
+  },
+  {
+    "n": 19,
+    "file": "x12_province_tilemap.pdf",
+    "label": "fig:tilemap"
+  },
+  {
+    "n": 20,
+    "file": "m2_facility_funnel.pdf",
+    "label": "fig:funnel"
+  },
+  {
+    "n": 21,
+    "file": "m3_provider_type.pdf",
+    "label": "fig:entity"
+  },
+  {
+    "n": 22,
+    "file": "m4_pandemic_strain.pdf",
+    "label": "fig:strain"
+  },
+  {
+    "n": 23,
+    "file": "x14_strain_timeline.pdf",
+    "label": "fig:timeline"
+  },
+  {
+    "n": 24,
+    "file": "x15_strain_by_province.pdf",
+    "label": "fig:strainprov"
+  },
+  {
+    "n": 25,
+    "file": "m5_inequity.pdf",
+    "label": "fig:ineq"
+  },
+  {
+    "n": 26,
+    "file": "m6_paediatric_rebound.pdf",
+    "label": "fig:rebound"
+  },
+  {
+    "n": 27,
+    "file": "x16_rebound_tilemap.pdf",
+    "label": "fig:rebtile"
+  },
+  {
+    "n": 28,
+    "file": "m7_syndromes_age_shift.pdf",
+    "label": "fig:syndromes"
+  },
+  {
+    "n": 29,
+    "file": "x17_seasonality.pdf",
+    "label": "fig:season"
+  },
+  {
+    "n": 30,
+    "file": "x20_rebound_by_province.pdf",
+    "label": "fig:rebprov"
+  },
+  {
+    "n": 31,
+    "file": "m8_phenotypes.pdf",
+    "label": "fig:pheno"
+  },
+  {
+    "n": 32,
+    "file": "x18_concentration.pdf",
+    "label": "fig:conc"
+  },
+  {
+    "n": 33,
+    "file": "x19_age_mortality.pdf",
+    "label": "fig:agemort"
+  },
+  {
+    "n": 34,
+    "file": "x34_hicare_detailed.pdf",
+    "label": "fig:hicare_detailed"
+  }
+]

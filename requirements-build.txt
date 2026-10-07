@@ -1,0 +1,3 @@
+# LaTeX compilation itself needs only Python standard library and XeLaTeX.
+# The following dependency is used by the PDF validation script.
+PyMuPDF

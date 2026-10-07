@@ -1,0 +1,2424 @@
+[
+  {
+    "type": "table",
+    "n": 1,
+    "label": "tab:components",
+    "rows": [
+      [
+        "Component",
+        "Content",
+        "Purpose"
+      ],
+      [
+        "Facility service profiles",
+        "Previous 12 months of non-ARI discharges: volume, mortality, early-death share, length of stay, age, cross-canton care and 11 diagnostic categories; 9,463,108 historical records",
+        "Supplement facility identifiers with comparable service characteristics"
+      ],
+      [
+        "Base learners",
+        "LightGBM and XGBoost; 33 base variables plus 18 facility-profile features in the current feature list; TabM included in EW",
+        "Estimate individual mortality risk"
+      ],
+      [
+        "Stratified stacking (2a)",
+        "Member logits with separate combination weights for children and COVID-19",
+        "Accommodate population risk heterogeneity"
+      ],
+      [
+        "Residual correction (2b)",
+        "Shallow boosted trees on subgroup variables, initialised with the stacked logit",
+        "Reduce systematic errors associated with specified variables"
+      ],
+      [
+        "Marginal projection (2c)",
+        "Unpenalised logistic fit using corrected score, age, sex, ethnicity, urban/rural residence, sector and infection type; year added in distribution",
+        "Constrain average residuals within included marginal categories in the fitting sample"
+      ],
+      [
+        "Monthly state updating",
+        "Update intercept, slope, COVID-19 and child offsets under a random walk",
+        "Track probability drift in later periods"
+      ],
+      [
+        "Nested fitting",
+        "Train the second layer on nested predictions; base learners do not directly use corresponding outer test records",
+        "Separate direct second-layer fitting from outer testing; historical information requires separate assessment"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1,
+      7
+    ]
+  },
+  {
+    "type": "table",
+    "n": 2,
+    "label": "tab:dyn",
+    "rows": [
+      [
+        "Updated coefficients",
+        "Drift variance",
+        "Log loss",
+        "Brier",
+        "Calibration intercept",
+        "Slope",
+        "ICI"
+      ],
+      [
+        "Intercept",
+        "0.001",
+        "0.2592",
+        "0.0794",
+        "+0.042",
+        "0.906",
+        "0.0098"
+      ],
+      [
+        "Intercept",
+        "0.01",
+        "0.2583",
+        "0.0792",
+        "+0.031",
+        "0.911",
+        "0.0092"
+      ],
+      [
+        "Intercept",
+        "0.1",
+        "0.2580",
+        "0.0791",
+        "+0.026",
+        "0.913",
+        "0.0090"
+      ],
+      [
+        "Intercept + slope",
+        "0.001",
+        "0.2585",
+        "0.0792",
+        "+0.028",
+        "0.969",
+        "0.0059"
+      ],
+      [
+        "Intercept + slope",
+        "0.01",
+        "0.2581",
+        "0.0791",
+        "+0.022",
+        "0.969",
+        "0.0063"
+      ],
+      [
+        "Intercept + slope",
+        "0.1",
+        "0.2580",
+        "0.0791",
+        "+0.019",
+        "0.966",
+        "0.0064"
+      ],
+      [
+        "Intercept + slope + COVID-19 and child offsets",
+        "0.001",
+        "0.2567",
+        "0.0788",
+        "-0.003",
+        "0.969",
+        "0.0053"
+      ],
+      [
+        "Intercept + slope + COVID-19 and child offsets",
+        "0.01",
+        "0.2563",
+        "0.0787",
+        "-0.005",
+        "0.975",
+        "0.0049"
+      ],
+      [
+        "Intercept + slope + COVID-19 and child offsets",
+        "0.1",
+        "0.2561",
+        "0.0786",
+        "-0.008",
+        "0.974",
+        "0.0048"
+      ],
+      [
+        "One-month rolling window (EW)",
+        "—",
+        "0.2578",
+        "0.0791",
+        "+0.023",
+        "0.916",
+        "0.0089"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1
+    ]
+  },
+  {
+    "type": "table",
+    "n": 3,
+    "label": "tab:perf",
+    "rows": [
+      [
+        "Population",
+        "Model",
+        "AUROC",
+        "AUPRC",
+        "Brier",
+        "Log loss",
+        "ICI",
+        "Calibration intercept",
+        "Slope"
+      ],
+      [
+        "Five-fold cross-validation",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "All ages",
+        "LR-7",
+        "0.859",
+        "0.296",
+        "0.0563",
+        "0.1934",
+        "0.0057",
+        "-0.000",
+        "0.999"
+      ],
+      [
+        "All ages",
+        "EW (equal weight)",
+        "0.903",
+        "0.416",
+        "0.0508",
+        "0.1707",
+        "0.0021",
+        "0.013",
+        "0.993"
+      ],
+      [
+        "All ages",
+        "HiCARE",
+        "0.904",
+        "0.419",
+        "0.0507",
+        "0.1701",
+        "0.0016",
+        "-0.005",
+        "1.003"
+      ],
+      [
+        "Children",
+        "LR-7",
+        "0.689",
+        "0.015",
+        "0.0053",
+        "0.0318",
+        "0.0006",
+        "0.001",
+        "0.881"
+      ],
+      [
+        "Children",
+        "EW (equal weight)",
+        "0.874",
+        "0.076",
+        "0.0051",
+        "0.0266",
+        "0.0009",
+        "0.081",
+        "1.067"
+      ],
+      [
+        "Children",
+        "HiCARE",
+        "0.874",
+        "0.081",
+        "0.0051",
+        "0.0265",
+        "0.0006",
+        "-0.009",
+        "0.984"
+      ],
+      [
+        "Adults",
+        "LR-7",
+        "0.729",
+        "0.303",
+        "0.1099",
+        "0.3633",
+        "0.0117",
+        "-0.000",
+        "1.006"
+      ],
+      [
+        "Adults",
+        "EW (equal weight)",
+        "0.815",
+        "0.426",
+        "0.0988",
+        "0.3221",
+        "0.0036",
+        "0.010",
+        "0.991"
+      ],
+      [
+        "Adults",
+        "HiCARE",
+        "0.817",
+        "0.429",
+        "0.0985",
+        "0.3210",
+        "0.0033",
+        "-0.005",
+        "1.006"
+      ],
+      [
+        "Temporal test 2022–2023 (update configurations in model labels and note)",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "All ages",
+        "LR-7 (best of nine variants)",
+        "0.868",
+        "0.195",
+        "0.0336",
+        "0.1252",
+        "0.0034",
+        "-0.045",
+        "0.975"
+      ],
+      [
+        "All ages",
+        "EW + rolling window",
+        "0.898",
+        "0.262",
+        "0.0326",
+        "0.1177",
+        "0.0079",
+        "-0.108",
+        "0.860"
+      ],
+      [
+        "All ages",
+        "HiCARE",
+        "0.900",
+        "0.266",
+        "0.0323",
+        "0.1163",
+        "0.0052",
+        "-0.097",
+        "0.924"
+      ],
+      [
+        "Children",
+        "LR-7 (best of nine variants)",
+        "0.665",
+        "0.009",
+        "0.0041",
+        "0.0261",
+        "0.0007",
+        "-0.099",
+        "0.842"
+      ],
+      [
+        "Children",
+        "EW + rolling window",
+        "0.841",
+        "0.044",
+        "0.0040",
+        "0.0228",
+        "0.0008",
+        "0.112",
+        "1.036"
+      ],
+      [
+        "Children",
+        "HiCARE",
+        "0.843",
+        "0.045",
+        "0.0041",
+        "0.0227",
+        "0.0011",
+        "-0.112",
+        "1.006"
+      ],
+      [
+        "Adults",
+        "LR-7 (best of nine variants)",
+        "0.693",
+        "0.204",
+        "0.0876",
+        "0.3066",
+        "0.0084",
+        "-0.040",
+        "0.915"
+      ],
+      [
+        "Adults",
+        "EW + rolling window",
+        "0.757",
+        "0.274",
+        "0.0848",
+        "0.2916",
+        "0.0204",
+        "-0.126",
+        "0.779"
+      ],
+      [
+        "Adults",
+        "HiCARE",
+        "0.764",
+        "0.279",
+        "0.0839",
+        "0.2879",
+        "0.0138",
+        "-0.096",
+        "0.852"
+      ],
+      [
+        "Unseen provinces (without location identifiers)",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "All ages",
+        "LR-7",
+        "0.848",
+        "0.269",
+        "0.0574",
+        "0.1982",
+        "0.0082",
+        "-0.039",
+        "0.912"
+      ],
+      [
+        "All ages",
+        "EW (no location)",
+        "0.865",
+        "0.319",
+        "0.0560",
+        "0.1913",
+        "0.0100",
+        "-0.004",
+        "0.856"
+      ],
+      [
+        "All ages",
+        "HiCARE (no location + profiles)",
+        "0.875",
+        "0.321",
+        "0.0554",
+        "0.1876",
+        "0.0101",
+        "0.171",
+        "0.921"
+      ],
+      [
+        "Children",
+        "LR-7",
+        "0.670",
+        "0.014",
+        "0.0053",
+        "0.0321",
+        "0.0010",
+        "-0.003",
+        "0.760"
+      ],
+      [
+        "Children",
+        "EW (no location)",
+        "0.813",
+        "0.036",
+        "0.0052",
+        "0.0292",
+        "0.0007",
+        "0.049",
+        "0.909"
+      ],
+      [
+        "Children",
+        "HiCARE (no location + profiles)",
+        "0.825",
+        "0.042",
+        "0.0052",
+        "0.0286",
+        "0.0006",
+        "0.067",
+        "0.984"
+      ],
+      [
+        "Adults",
+        "LR-7",
+        "0.706",
+        "0.275",
+        "0.1122",
+        "0.3726",
+        "0.0165",
+        "-0.041",
+        "0.845"
+      ],
+      [
+        "Adults",
+        "EW (no location)",
+        "0.737",
+        "0.327",
+        "0.1093",
+        "0.3617",
+        "0.0201",
+        "-0.007",
+        "0.785"
+      ],
+      [
+        "Adults",
+        "HiCARE (no location + profiles)",
+        "0.757",
+        "0.328",
+        "0.1082",
+        "0.3547",
+        "0.0203",
+        "0.176",
+        "0.857"
+      ]
+    ],
+    "spans": [
+      1,
+      11,
+      21
+    ],
+    "separators": [
+      1,
+      11,
+      21
+    ]
+  },
+  {
+    "type": "table",
+    "n": 4,
+    "label": "tab:layers",
+    "rows": [
+      [
+        "Model",
+        "AUROC",
+        "Log loss",
+        "ICI",
+        "Calibration intercept",
+        "Child calibration intercept",
+        "Child AUPRC",
+        "Mean |log(O/E)|",
+        "Max |log(O/E)|",
+        "Worst ECE"
+      ],
+      [
+        "LR-7",
+        "0.8591",
+        "0.1934",
+        "0.0057",
+        "-0.0001",
+        "+0.001",
+        "0.015",
+        "0.0006",
+        "0.022",
+        "0.0183"
+      ],
+      [
+        "EW: equal weighting + held-out recalibration",
+        "0.9028",
+        "0.1707",
+        "0.0021",
+        "+0.0135",
+        "+0.081",
+        "0.076",
+        "0.0219",
+        "0.201",
+        "0.0076"
+      ],
+      [
+        "LightGBM + facility profiles",
+        "0.9034",
+        "0.1704",
+        "0.0026",
+        "+0.0095",
+        "-0.005",
+        "0.083",
+        "0.0132",
+        "0.142",
+        "0.0075"
+      ],
+      [
+        "Equal weighting + facility profiles",
+        "0.9033",
+        "0.1704",
+        "0.0017",
+        "+0.0135",
+        "+0.094",
+        "0.079",
+        "0.0229",
+        "0.220",
+        "0.0068"
+      ],
+      [
+        "+ Stratified stacking (2a)",
+        "0.9035",
+        "0.1703",
+        "0.0017",
+        "-0.0052",
+        "+0.019",
+        "0.080",
+        "0.0126",
+        "0.178",
+        "0.0064"
+      ],
+      [
+        "+ Residual correction (2b)",
+        "0.9037",
+        "0.1701",
+        "0.0017",
+        "-0.0038",
+        "+0.019",
+        "0.080",
+        "0.0089",
+        "0.166",
+        "0.0050"
+      ],
+      [
+        "+ Marginal projection (2c) = HiCARE",
+        "0.9037",
+        "0.1701",
+        "0.0016",
+        "-0.0052",
+        "-0.009",
+        "0.081",
+        "0.0054",
+        "0.076",
+        "0.0059"
+      ],
+      [
+        "HiCARE without period terms",
+        "0.9036",
+        "0.1702",
+        "0.0014",
+        "-0.0049",
+        "-0.008",
+        "0.080",
+        "0.0088",
+        "0.079",
+        "0.0068"
+      ],
+      [
+        "HiCARE with LightGBM only",
+        "0.9037",
+        "0.1701",
+        "0.0015",
+        "-0.0045",
+        "-0.009",
+        "0.084",
+        "0.0048",
+        "0.067",
+        "0.0059"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1
+    ]
+  },
+  {
+    "type": "table",
+    "n": 5,
+    "label": "tab:temporal",
+    "rows": [
+      [
+        "Model (trained in 2015–2021)",
+        "AUROC",
+        "AUPRC",
+        "Brier",
+        "Log loss",
+        "ICI",
+        "Calibration intercept",
+        "Slope",
+        "O/E"
+      ],
+      [
+        "LR-7, unseen year mapped to 2015",
+        "0.865",
+        "0.178",
+        "0.0340",
+        "0.1267",
+        "0.0062",
+        "-0.13",
+        "0.99",
+        "0.90"
+      ],
+      [
+        "LR-7, latest year carried forward",
+        "0.865",
+        "0.178",
+        "0.0360",
+        "0.1337",
+        "0.0259",
+        "-0.61",
+        "0.99",
+        "0.60"
+      ],
+      [
+        "LR-7, no year",
+        "0.862",
+        "0.175",
+        "0.0351",
+        "0.1302",
+        "0.0143",
+        "-0.35",
+        "0.88",
+        "0.75"
+      ],
+      [
+        "Unseen year as 2015 + rolling window",
+        "0.866",
+        "0.186",
+        "0.0338",
+        "0.1263",
+        "0.0050",
+        "0.04",
+        "0.97",
+        "1.04"
+      ],
+      [
+        "Latest year + rolling window",
+        "0.867",
+        "0.192",
+        "0.0337",
+        "0.1260",
+        "0.0054",
+        "-0.05",
+        "0.94",
+        "0.96"
+      ],
+      [
+        "No year + rolling window",
+        "0.862",
+        "0.183",
+        "0.0342",
+        "0.1281",
+        "0.0088",
+        "-0.06",
+        "0.86",
+        "0.95"
+      ],
+      [
+        "Unseen year as 2015 + state space",
+        "0.867",
+        "0.190",
+        "0.0337",
+        "0.1256",
+        "0.0034",
+        "0.06",
+        "1.02",
+        "1.05"
+      ],
+      [
+        "Latest year + state space",
+        "0.868",
+        "0.195",
+        "0.0336",
+        "0.1252",
+        "0.0034",
+        "-0.05",
+        "0.98",
+        "0.96"
+      ],
+      [
+        "No year + state space",
+        "0.867",
+        "0.193",
+        "0.0336",
+        "0.1254",
+        "0.0032",
+        "-0.04",
+        "0.98",
+        "0.96"
+      ],
+      [
+        "EW, static",
+        "0.898",
+        "0.254",
+        "0.0341",
+        "0.1216",
+        "0.0182",
+        "-0.50",
+        "0.90",
+        "0.68"
+      ],
+      [
+        "EW + rolling window",
+        "0.898",
+        "0.262",
+        "0.0326",
+        "0.1177",
+        "0.0079",
+        "-0.11",
+        "0.86",
+        "0.92"
+      ],
+      [
+        "EW + state space",
+        "0.900",
+        "0.268",
+        "0.0322",
+        "0.1163",
+        "0.0051",
+        "-0.09",
+        "0.94",
+        "0.93"
+      ],
+      [
+        "HiCARE, static",
+        "0.899",
+        "0.247",
+        "0.0343",
+        "0.1220",
+        "0.0196",
+        "-0.53",
+        "0.91",
+        "0.66"
+      ],
+      [
+        "HiCARE + rolling window",
+        "0.899",
+        "0.264",
+        "0.0324",
+        "0.1169",
+        "0.0067",
+        "-0.08",
+        "0.87",
+        "0.94"
+      ],
+      [
+        "HiCARE + state space",
+        "0.900",
+        "0.266",
+        "0.0323",
+        "0.1163",
+        "0.0052",
+        "-0.10",
+        "0.92",
+        "0.93"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1,
+      10,
+      13
+    ]
+  },
+  {
+    "type": "table",
+    "n": 6,
+    "label": "tab:win",
+    "rows": [
+      [
+        "Protocol",
+        "Population",
+        "EW wins",
+        "HiCARE wins",
+        "Metrics favouring LR-7 over HiCARE"
+      ],
+      [
+        "Cross-validation",
+        "All ages",
+        "11/13",
+        "11/13",
+        "Calibration intercept, slope"
+      ],
+      [
+        "Cross-validation",
+        "Children",
+        "10/13",
+        "11/13",
+        "Calibration intercept, ICI"
+      ],
+      [
+        "Cross-validation",
+        "Adults",
+        "11/13",
+        "12/13",
+        "Calibration intercept"
+      ],
+      [
+        "Temporal test 2022–2023",
+        "All ages",
+        "9/13",
+        "9/13",
+        "Calibration intercept, slope, ECE, ICI"
+      ],
+      [
+        "Temporal test 2022–2023",
+        "Children",
+        "11/13",
+        "11/13",
+        "Calibration intercept, ICI"
+      ],
+      [
+        "Temporal test 2022–2023",
+        "Adults",
+        "9/13",
+        "9/13",
+        "Calibration intercept, slope, ECE, ICI"
+      ],
+      [
+        "Unseen provinces",
+        "All ages",
+        "10/13",
+        "10/13",
+        "Calibration intercept, ECE, ICI"
+      ],
+      [
+        "Unseen provinces",
+        "Children",
+        "12/13",
+        "12/13",
+        "Calibration intercept"
+      ],
+      [
+        "Unseen provinces",
+        "Adults",
+        "10/13",
+        "10/13",
+        "Calibration intercept, ECE, ICI"
+      ],
+      [
+        "Total",
+        "",
+        "93/117",
+        "95/117",
+        ""
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1,
+      10
+    ]
+  },
+  {
+    "type": "table",
+    "n": 7,
+    "label": "tab:prov",
+    "rows": [
+      [
+        "Province",
+        "Admissions",
+        "Deaths",
+        "Expected",
+        "Crude ratio",
+        "Standardised (95% credible interval)",
+        "Flag",
+        "2015—19",
+        "2020—21",
+        "2022—23",
+        "Children",
+        "Adults"
+      ],
+      [
+        "El Oro",
+        "27,710",
+        "3,530",
+        "2,254",
+        "1.79",
+        "1.56 [1.51—1.61]",
+        "Above expected",
+        "1.20",
+        "1.68",
+        "1.51",
+        "0.85",
+        "1.59"
+      ],
+      [
+        "Sucumbíos",
+        "6,280",
+        "474",
+        "318",
+        "1.06",
+        "1.47 [1.34—1.60]",
+        "Above expected",
+        "1.21",
+        "1.50",
+        "1.56",
+        "1.43",
+        "1.46"
+      ],
+      [
+        "Manabí",
+        "37,113",
+        "3,059",
+        "2,354",
+        "1.16",
+        "1.30 [1.25—1.34]",
+        "Above expected",
+        "1.01",
+        "1.35",
+        "1.51",
+        "1.49",
+        "1.29"
+      ],
+      [
+        "Esmeraldas",
+        "10,122",
+        "726",
+        "573",
+        "1.01",
+        "1.26 [1.17—1.35]",
+        "Above expected",
+        "0.89",
+        "1.49",
+        "1.01",
+        "1.20",
+        "1.26"
+      ],
+      [
+        "Santo Domingo de los Tsáchilas",
+        "15,862",
+        "1,542",
+        "1,257",
+        "1.36",
+        "1.22 [1.16—1.29]",
+        "Above expected",
+        "0.75",
+        "1.30",
+        "1.54",
+        "0.84",
+        "1.24"
+      ],
+      [
+        "Tungurahua",
+        "26,946",
+        "2,464",
+        "2,173",
+        "1.28",
+        "1.13 [1.09—1.18]",
+        "Above expected",
+        "1.14",
+        "1.19",
+        "0.75",
+        "0.53",
+        "1.16"
+      ],
+      [
+        "Napo",
+        "3,554",
+        "215",
+        "192",
+        "0.85",
+        "1.11 [0.97—1.26]",
+        "Compatible with expected",
+        "0.71",
+        "1.30",
+        "1.00",
+        "0.84",
+        "1.14"
+      ],
+      [
+        "Guayas",
+        "106,639",
+        "7,723",
+        "6,953",
+        "1.02",
+        "1.11 [1.09—1.14]",
+        "Above expected",
+        "1.70",
+        "0.90",
+        "1.33",
+        "1.15",
+        "1.11"
+      ],
+      [
+        "Santa Elena",
+        "8,408",
+        "521",
+        "472",
+        "0.87",
+        "1.10 [1.01—1.19]",
+        "Above expected",
+        "1.07",
+        "1.09",
+        "1.20",
+        "0.30",
+        "1.14"
+      ],
+      [
+        "Carchi",
+        "6,078",
+        "512",
+        "465",
+        "1.18",
+        "1.10 [1.01—1.19]",
+        "Above expected",
+        "0.85",
+        "1.26",
+        "0.88",
+        "0.65",
+        "1.12"
+      ],
+      [
+        "Azuay",
+        "40,903",
+        "3,431",
+        "3,231",
+        "1.18",
+        "1.06 [1.03—1.10]",
+        "Above expected",
+        "1.03",
+        "1.09",
+        "1.03",
+        "1.48",
+        "1.05"
+      ],
+      [
+        "Pastaza",
+        "4,165",
+        "198",
+        "191",
+        "0.67",
+        "1.03 [0.90—1.18]",
+        "Compatible with expected",
+        "0.89",
+        "1.12",
+        "0.88",
+        "0.68",
+        "1.08"
+      ],
+      [
+        "Chimborazo",
+        "21,488",
+        "1,535",
+        "1,572",
+        "1.00",
+        "0.98 [0.93—1.03]",
+        "Compatible with expected",
+        "0.71",
+        "1.14",
+        "0.80",
+        "0.41",
+        "1.00"
+      ],
+      [
+        "Galápagos",
+        "729",
+        "40",
+        "43",
+        "0.77",
+        "0.96 [0.72—1.22]",
+        "Compatible with expected",
+        "0.74",
+        "1.08",
+        "0.97",
+        "—",
+        "0.98"
+      ],
+      [
+        "Cañar",
+        "12,809",
+        "755",
+        "845",
+        "0.83",
+        "0.90 [0.83—0.96]",
+        "Below expected",
+        "0.75",
+        "1.10",
+        "0.60",
+        "0.41",
+        "0.92"
+      ],
+      [
+        "Orellana",
+        "3,104",
+        "151",
+        "176",
+        "0.68",
+        "0.87 [0.74—1.01]",
+        "Compatible with expected",
+        "0.70",
+        "0.98",
+        "0.72",
+        "0.71",
+        "0.89"
+      ],
+      [
+        "Zamora Chinchipe",
+        "4,260",
+        "203",
+        "236",
+        "0.67",
+        "0.87 [0.76—0.99]",
+        "Below expected",
+        "0.67",
+        "0.98",
+        "0.91",
+        "0.43",
+        "0.91"
+      ],
+      [
+        "Loja",
+        "20,664",
+        "1,507",
+        "1,828",
+        "1.02",
+        "0.83 [0.79—0.87]",
+        "Below expected",
+        "0.58",
+        "0.97",
+        "0.75",
+        "0.43",
+        "0.84"
+      ],
+      [
+        "Imbabura",
+        "17,464",
+        "1,083",
+        "1,318",
+        "0.87",
+        "0.82 [0.78—0.87]",
+        "Below expected",
+        "0.54",
+        "1.00",
+        "0.57",
+        "0.39",
+        "0.84"
+      ],
+      [
+        "Pichincha",
+        "148,923",
+        "9,166",
+        "11,409",
+        "0.86",
+        "0.80 [0.79—0.82]",
+        "Below expected",
+        "0.85",
+        "0.80",
+        "0.76",
+        "0.99",
+        "0.80"
+      ],
+      [
+        "Los Ríos",
+        "19,676",
+        "1,004",
+        "1,255",
+        "0.72",
+        "0.80 [0.75—0.85]",
+        "Below expected",
+        "0.80",
+        "0.73",
+        "1.26",
+        "0.59",
+        "0.81"
+      ],
+      [
+        "Bolívar",
+        "5,663",
+        "267",
+        "410",
+        "0.66",
+        "0.67 [0.59—0.75]",
+        "Below expected",
+        "0.68",
+        "0.69",
+        "0.63",
+        "0.58",
+        "0.67"
+      ],
+      [
+        "Cotopaxi",
+        "13,360",
+        "605",
+        "959",
+        "0.64",
+        "0.64 [0.59—0.69]",
+        "Below expected",
+        "0.67",
+        "0.60",
+        "0.77",
+        "0.74",
+        "0.63"
+      ],
+      [
+        "Morona Santiago",
+        "14,275",
+        "337",
+        "565",
+        "0.33",
+        "0.61 [0.55—0.67]",
+        "Below expected",
+        "0.60",
+        "0.63",
+        "0.62",
+        "0.80",
+        "0.58"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1
+    ]
+  },
+  {
+    "type": "table",
+    "n": 8,
+    "label": "tab:smrsum",
+    "rows": [
+      [
+        "Unit",
+        "Case-mix adjustment",
+        "Number of units",
+        "Between-unit SD",
+        "Above expected",
+        "Below expected",
+        "10th–90th percentile",
+        "Excess deaths in high-ratio units",
+        "Death share"
+      ],
+      [
+        "Province",
+        "None (crude)",
+        "24",
+        "0.32",
+        "6",
+        "12",
+        "0.67—1.25",
+        "3,523",
+        "8.6%"
+      ],
+      [
+        "Province",
+        "Age group, sex, type, year",
+        "24",
+        "0.25",
+        "8",
+        "8",
+        "0.70—1.33",
+        "4,257",
+        "10.4%"
+      ],
+      [
+        "Province",
+        "Clinical case-mix model",
+        "24",
+        "0.24",
+        "10",
+        "9",
+        "0.71—1.29",
+        "3,932",
+        "9.6%"
+      ],
+      [
+        "Administering entity",
+        "None (crude)",
+        "11",
+        "0.57",
+        "3",
+        "7",
+        "0.34—1.19",
+        "5,283",
+        "12.9%"
+      ],
+      [
+        "Administering entity",
+        "Age group, sex, type, year",
+        "11",
+        "0.43",
+        "2",
+        "7",
+        "0.48—1.09",
+        "5,192",
+        "12.6%"
+      ],
+      [
+        "Administering entity",
+        "Clinical case-mix model",
+        "11",
+        "0.40",
+        "1",
+        "7",
+        "0.51—1.02",
+        "4,698",
+        "11.4%"
+      ],
+      [
+        "Facility class",
+        "None (crude)",
+        "11",
+        "0.94",
+        "5",
+        "6",
+        "0.17—2.48",
+        "7,923",
+        "19.4%"
+      ],
+      [
+        "Facility class",
+        "Age group, sex, type, year",
+        "11",
+        "0.69",
+        "4",
+        "5",
+        "0.62—2.56",
+        "3,784",
+        "9.3%"
+      ],
+      [
+        "Facility class",
+        "Clinical case-mix model",
+        "11",
+        "0.56",
+        "4",
+        "5",
+        "0.62—2.06",
+        "3,480",
+        "8.5%"
+      ],
+      [
+        "Facility group",
+        "None (crude)",
+        "240",
+        "1.07",
+        "51",
+        "153",
+        "0.09—1.73",
+        "12,326",
+        "30.5%"
+      ],
+      [
+        "Facility group",
+        "Age group, sex, type, year",
+        "239",
+        "0.85",
+        "51",
+        "141",
+        "0.18—1.56",
+        "9,134",
+        "22.6%"
+      ],
+      [
+        "Facility group",
+        "Clinical case-mix model",
+        "239",
+        "0.81",
+        "49",
+        "144",
+        "0.20—1.50",
+        "8,629",
+        "21.4%"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1
+    ]
+  },
+  {
+    "type": "table",
+    "n": 9,
+    "label": "tab:entity",
+    "rows": [
+      [
+        "Provider",
+        "Admissions",
+        "Deaths",
+        "Crude ratio",
+        "Standardised (95% credible interval)",
+        "Flag"
+      ],
+      [
+        "Administering entity",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Ministry of Public Health",
+        "262,062",
+        "22,145",
+        "1.19",
+        "1.27 [1.25—1.29]",
+        "Above expected"
+      ],
+      [
+        "Junta de Beneficencia",
+        "23,274",
+        "646",
+        "0.39",
+        "1.02 [0.95—1.10]",
+        "Compatible with expected"
+      ],
+      [
+        "Ministry of Justice",
+        "951",
+        "79",
+        "1.17",
+        "1.02 [0.81—1.24]",
+        "Compatible with expected"
+      ],
+      [
+        "Other public",
+        "3,794",
+        "494",
+        "1.83",
+        "0.99 [0.91—1.08]",
+        "Compatible with expected"
+      ],
+      [
+        "Social Security (IESS)",
+        "128,563",
+        "10,742",
+        "1.17",
+        "0.87 [0.85—0.89]",
+        "Below expected"
+      ],
+      [
+        "Armed forces",
+        "11,619",
+        "676",
+        "0.82",
+        "0.79 [0.73—0.85]",
+        "Below expected"
+      ],
+      [
+        "For-profit private",
+        "120,106",
+        "5,527",
+        "0.65",
+        "0.73 [0.72—0.75]",
+        "Below expected"
+      ],
+      [
+        "Cancer Society (SOLCA)",
+        "2,360",
+        "112",
+        "0.67",
+        "0.63 [0.52—0.75]",
+        "Below expected"
+      ],
+      [
+        "Fiscomisional",
+        "819",
+        "18",
+        "0.31",
+        "0.59 [0.38—0.84]",
+        "Below expected"
+      ],
+      [
+        "Non-profit private",
+        "15,911",
+        "313",
+        "0.28",
+        "0.51 [0.46—0.57]",
+        "Below expected"
+      ],
+      [
+        "Municipal government",
+        "6,671",
+        "294",
+        "0.62",
+        "0.36 [0.32—0.40]",
+        "Below expected"
+      ],
+      [
+        "Facility class",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Infectious-disease hospital",
+        "930",
+        "249",
+        "3.76",
+        "2.24 [1.98—2.53]",
+        "Above expected"
+      ],
+      [
+        "Children’s hospital",
+        "41,332",
+        "585",
+        "0.20",
+        "2.06 [1.89—2.23]",
+        "Above expected"
+      ],
+      [
+        "Pulmonary hospital",
+        "901",
+        "161",
+        "2.51",
+        "1.80 [1.53—2.08]",
+        "Above expected"
+      ],
+      [
+        "General hospital",
+        "295,272",
+        "26,400",
+        "1.26",
+        "1.13 [1.11—1.14]",
+        "Above expected"
+      ],
+      [
+        "Multispecialty hospital",
+        "53,180",
+        "5,949",
+        "1.57",
+        "1.02 [0.99—1.04]",
+        "Compatible with expected"
+      ],
+      [
+        "Geriatric hospital",
+        "1,610",
+        "233",
+        "2.03",
+        "0.91 [0.79—1.03]",
+        "Compatible with expected"
+      ],
+      [
+        "General clinic",
+        "42,835",
+        "1,973",
+        "0.65",
+        "0.86 [0.82—0.89]",
+        "Below expected"
+      ],
+      [
+        "Maternity hospital",
+        "3,491",
+        "41",
+        "0.16",
+        "0.74 [0.54—0.97]",
+        "Below expected"
+      ],
+      [
+        "Oncology hospital",
+        "2,361",
+        "112",
+        "0.67",
+        "0.63 [0.52—0.75]",
+        "Below expected"
+      ],
+      [
+        "Basic hospital",
+        "131,023",
+        "5,163",
+        "0.55",
+        "0.62 [0.60—0.64]",
+        "Below expected"
+      ],
+      [
+        "Day-care facility",
+        "2,717",
+        "30",
+        "0.15",
+        "0.29 [0.20—0.39]",
+        "Below expected"
+      ]
+    ],
+    "spans": [
+      1,
+      13
+    ],
+    "separators": [
+      1,
+      13
+    ]
+  },
+  {
+    "type": "table",
+    "n": 10,
+    "label": "tab:strain",
+    "rows": [
+      [
+        "Admissions",
+        "Period",
+        "n",
+        "Deaths",
+        "Expected",
+        "O/E (95% confidence interval)",
+        "Excess deaths"
+      ],
+      [
+        "All non-COVID",
+        "2015—2019",
+        "276,074",
+        "8,817",
+        "8,817",
+        "1.00 [0.98—1.02]",
+        "+0"
+      ],
+      [
+        "All non-COVID",
+        "2020—2021",
+        "49,742",
+        "3,485",
+        "2,108",
+        "1.65 [1.60—1.71]",
+        "+1,377"
+      ],
+      [
+        "All non-COVID",
+        "2022—2023",
+        "113,826",
+        "3,200",
+        "3,314",
+        "0.97 [0.93—1.00]",
+        "-114"
+      ],
+      [
+        "Adult non-COVID",
+        "2015—2019",
+        "95,055",
+        "7,946",
+        "7,852",
+        "1.01 [0.99—1.03]",
+        "+94"
+      ],
+      [
+        "Adult non-COVID",
+        "2020—2021",
+        "24,081",
+        "3,235",
+        "1,976",
+        "1.64 [1.58—1.69]",
+        "+1,259"
+      ],
+      [
+        "Adult non-COVID",
+        "2022—2023",
+        "32,406",
+        "2,876",
+        "2,943",
+        "0.98 [0.94—1.01]",
+        "-67"
+      ],
+      [
+        "Paediatric non-COVID",
+        "2015—2019",
+        "181,019",
+        "871",
+        "965",
+        "0.90 [0.84—0.96]",
+        "-94"
+      ],
+      [
+        "Paediatric non-COVID",
+        "2020—2021",
+        "25,661",
+        "250",
+        "132",
+        "1.89 [1.67—2.14]",
+        "+118"
+      ],
+      [
+        "Paediatric non-COVID",
+        "2022—2023",
+        "81,420",
+        "324",
+        "371",
+        "0.87 [0.78—0.97]",
+        "-47"
+      ],
+      [
+        "Non-COVID pneumonia",
+        "2015—2019",
+        "201,464",
+        "8,444",
+        "8,395",
+        "1.01 [0.98—1.03]",
+        "+49"
+      ],
+      [
+        "Non-COVID pneumonia",
+        "2020—2021",
+        "38,750",
+        "3,327",
+        "2,019",
+        "1.65 [1.59—1.70]",
+        "+1,308"
+      ],
+      [
+        "Non-COVID pneumonia",
+        "2022—2023",
+        "82,882",
+        "3,057",
+        "3,142",
+        "0.97 [0.94—1.01]",
+        "-85"
+      ],
+      [
+        "Non-COVID, non-pneumonia",
+        "2015—2019",
+        "74,610",
+        "373",
+        "422",
+        "0.88 [0.80—0.98]",
+        "-49"
+      ],
+      [
+        "Non-COVID, non-pneumonia",
+        "2020—2021",
+        "10,992",
+        "158",
+        "88",
+        "1.79 [1.52—2.09]",
+        "+70"
+      ],
+      [
+        "Non-COVID, non-pneumonia",
+        "2022—2023",
+        "30,944",
+        "143",
+        "172",
+        "0.83 [0.70—0.98]",
+        "-29"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1
+    ]
+  },
+  {
+    "type": "table",
+    "n": 11,
+    "label": "tab:load",
+    "rows": [
+      [
+        "COVID-19 demand",
+        "Deaths",
+        "Adult O/E",
+        "Deaths",
+        "Child O/E",
+        "Deaths",
+        "Non-pneumonia O/E"
+      ],
+      [
+        "None",
+        "193",
+        "0.92 [0.79—1.06]",
+        "27",
+        "1.40 [0.92—2.04]",
+        "13",
+        "1.76 [0.94—3.01]"
+      ],
+      [
+        "0—0.5×",
+        "465",
+        "1.19 [1.08—1.30]",
+        "104",
+        "2.77 [2.27—3.36]",
+        "19",
+        "1.28 [0.77—2.01]"
+      ],
+      [
+        "0.5—1×",
+        "383",
+        "1.57 [1.42—1.73]",
+        "6",
+        "0.60 [0.22—1.31]",
+        "15",
+        "1.74 [0.97—2.87]"
+      ],
+      [
+        "1—2×",
+        "814",
+        "2.52 [2.35—2.69]",
+        "42",
+        "4.71 [3.40—6.37]",
+        "48",
+        "3.40 [2.50—4.50]"
+      ],
+      [
+        "2—4×",
+        "603",
+        "2.41 [2.22—2.61]",
+        "17",
+        "2.13 [1.24—3.41]",
+        "34",
+        "3.16 [2.19—4.42]"
+      ],
+      [
+        ">4×",
+        "356",
+        "2.34 [2.10—2.60]",
+        "6",
+        "1.24 [0.45—2.70]",
+        "16",
+        "1.64 [0.94—2.66]"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1
+    ]
+  },
+  {
+    "type": "table",
+    "n": 12,
+    "label": "tab:ineq",
+    "rows": [
+      [
+        "Stratum",
+        "Contrast",
+        "Deaths",
+        "Crude ratio",
+        "Clinical case mix",
+        "+ Care setting",
+        "Deaths within 48 h"
+      ],
+      [
+        "Children",
+        "Rural versus urban residents",
+        "321",
+        "1.38 [1.22—1.57]",
+        "1.19 [1.05—1.36]",
+        "1.25 [1.10—1.42]",
+        "29% versus 21%"
+      ],
+      [
+        "Children",
+        "Indigenous versus Mestizo",
+        "109",
+        "1.25 [0.99—1.48]",
+        "0.93 [0.74—1.09]",
+        "1.32 [1.05—1.56]",
+        "45% versus 21%"
+      ],
+      [
+        "Children",
+        "Care outside versus within home canton",
+        "721",
+        "3.99 [3.65—4.38]",
+        "3.33 [3.04—3.67]",
+        "2.55 [2.34—2.80]",
+        "21% versus 24%"
+      ],
+      [
+        "Children",
+        "Public versus private sector",
+        "1,245",
+        "1.48 [1.32—1.67]",
+        "1.14 [1.02—1.30]",
+        "0.97 [0.87—1.10]",
+        "24% versus 19%"
+      ],
+      [
+        "Adults",
+        "Rural versus urban residents",
+        "5,785",
+        "0.95 [0.93—0.97]",
+        "1.01 [0.98—1.03]",
+        "1.02 [0.99—1.04]",
+        "18% versus 16%"
+      ],
+      [
+        "Adults",
+        "Indigenous versus Mestizo",
+        "587",
+        "0.60 [0.56—0.66]",
+        "0.78 [0.73—0.84]",
+        "1.01 [0.94—1.08]",
+        "24% versus 17%"
+      ],
+      [
+        "Adults",
+        "Afro-Ecuadorian versus Mestizo",
+        "159",
+        "0.94 [0.80—1.08]",
+        "1.08 [0.94—1.24]",
+        "0.96 [0.84—1.11]",
+        "23% versus 17%"
+      ],
+      [
+        "Adults",
+        "Montubio versus Mestizo",
+        "55",
+        "0.59 [0.43—0.76]",
+        "0.68 [0.51—0.87]",
+        "0.94 [0.70—1.20]",
+        "25% versus 17%"
+      ],
+      [
+        "Adults",
+        "Care outside versus within home canton",
+        "9,878",
+        "1.25 [1.22—1.27]",
+        "1.22 [1.19—1.24]",
+        "1.10 [1.08—1.12]",
+        "17% versus 17%"
+      ],
+      [
+        "Adults",
+        "Public versus private sector",
+        "33,203",
+        "2.06 [2.00—2.12]",
+        "1.47 [1.44—1.51]",
+        "1.00 [0.98—1.03]",
+        "17% versus 14%"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1
+    ]
+  },
+  {
+    "type": "table",
+    "n": 13,
+    "label": "tab:rebound",
+    "rows": [
+      [
+        "Age",
+        "Period",
+        "Observed",
+        "Expected",
+        "O/E (95% prediction interval)",
+        "Difference",
+        "O/E with trend"
+      ],
+      [
+        "<1 year",
+        "March 2020–December 2021",
+        "5,132",
+        "19,489",
+        "0.26 [0.24—0.28]",
+        "-14,357",
+        "0.21"
+      ],
+      [
+        "<1 year",
+        "2022",
+        "8,271",
+        "10,647",
+        "0.78 [0.70—0.86]",
+        "-2,376",
+        "0.55"
+      ],
+      [
+        "<1 year",
+        "2023",
+        "11,408",
+        "10,376",
+        "1.10 [1.00—1.21]",
+        "+1,032",
+        "0.72"
+      ],
+      [
+        "<1 year",
+        "March 2020–December 2023",
+        "24,811",
+        "40,512",
+        "0.61 [0.57—0.65]",
+        "-15,701",
+        "0.44"
+      ],
+      [
+        "1–4 years",
+        "March 2020–December 2021",
+        "8,256",
+        "29,386",
+        "0.28 [0.26—0.30]",
+        "-21,130",
+        "0.25"
+      ],
+      [
+        "1–4 years",
+        "2022",
+        "18,673",
+        "15,979",
+        "1.17 [1.08—1.27]",
+        "+2,694",
+        "1.00"
+      ],
+      [
+        "1–4 years",
+        "2023",
+        "23,945",
+        "15,571",
+        "1.54 [1.42—1.68]",
+        "+8,374",
+        "1.28"
+      ],
+      [
+        "1–4 years",
+        "March 2020–December 2023",
+        "50,874",
+        "60,935",
+        "0.83 [0.79—0.88]",
+        "-10,061",
+        "0.73"
+      ],
+      [
+        "5–9 years",
+        "March 2020–December 2021",
+        "2,105",
+        "8,027",
+        "0.26 [0.24—0.29]",
+        "-5,922",
+        "0.24"
+      ],
+      [
+        "5–9 years",
+        "2022",
+        "6,037",
+        "4,406",
+        "1.37 [1.19—1.57]",
+        "+1,631",
+        "1.22"
+      ],
+      [
+        "5–9 years",
+        "2023",
+        "8,793",
+        "4,332",
+        "2.03 [1.76—2.34]",
+        "+4,461",
+        "1.76"
+      ],
+      [
+        "5–9 years",
+        "March 2020–December 2023",
+        "16,935",
+        "16,765",
+        "1.01 [0.93—1.10]",
+        "+170",
+        "0.91"
+      ],
+      [
+        "10–19 years",
+        "March 2020–December 2021",
+        "1,443",
+        "3,888",
+        "0.37 [0.34—0.40]",
+        "-2,445",
+        "0.37"
+      ],
+      [
+        "10–19 years",
+        "2022",
+        "1,989",
+        "2,171",
+        "0.92 [0.82—1.02]",
+        "-182",
+        "0.92"
+      ],
+      [
+        "10–19 years",
+        "2023",
+        "2,304",
+        "2,175",
+        "1.06 [0.95—1.18]",
+        "+129",
+        "1.07"
+      ],
+      [
+        "10–19 years",
+        "March 2020–December 2023",
+        "5,736",
+        "8,233",
+        "0.70 [0.65—0.74]",
+        "-2,497",
+        "0.70"
+      ],
+      [
+        "0–19 years",
+        "March 2020–December 2021",
+        "16,936",
+        "63,531",
+        "0.27 [0.25—0.28]",
+        "-46,595",
+        "0.24"
+      ],
+      [
+        "0–19 years",
+        "2022",
+        "34,970",
+        "35,398",
+        "0.99 [0.92—1.07]",
+        "-428",
+        "0.85"
+      ],
+      [
+        "0–19 years",
+        "2023",
+        "46,450",
+        "35,069",
+        "1.32 [1.23—1.43]",
+        "+11,381",
+        "1.11"
+      ],
+      [
+        "0–19 years",
+        "March 2020–December 2023",
+        "98,356",
+        "133,998",
+        "0.73 [0.70—0.77]",
+        "-35,642",
+        "0.64"
+      ],
+      [
+        "Deaths, 0–19 years",
+        "March 2020–December 2021",
+        "202",
+        "306",
+        "0.66 [0.58—0.75]",
+        "-104",
+        "0.72"
+      ],
+      [
+        "Deaths, 0–19 years",
+        "2022",
+        "156",
+        "170",
+        "0.92 [0.78—1.08]",
+        "-14",
+        "1.02"
+      ],
+      [
+        "Deaths, 0–19 years",
+        "2023",
+        "168",
+        "169",
+        "1.00 [0.84—1.19]",
+        "-1",
+        "1.14"
+      ],
+      [
+        "Deaths, 0–19 years",
+        "March 2020–December 2023",
+        "526",
+        "645",
+        "0.82 [0.73—0.91]",
+        "-119",
+        "0.90"
+      ],
+      [
+        "≥20 years",
+        "March 2020–December 2021",
+        "20,074",
+        "36,547",
+        "0.55 [0.50—0.60]",
+        "-16,473",
+        "0.49"
+      ],
+      [
+        "≥20 years",
+        "2022",
+        "14,903",
+        "20,925",
+        "0.71 [0.64—0.79]",
+        "-6,022",
+        "0.61"
+      ],
+      [
+        "≥20 years",
+        "2023",
+        "17,503",
+        "21,248",
+        "0.82 [0.74—0.92]",
+        "-3,745",
+        "0.68"
+      ],
+      [
+        "≥20 years",
+        "March 2020–December 2023",
+        "52,480",
+        "78,719",
+        "0.67 [0.62—0.71]",
+        "-26,239",
+        "0.58"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1,
+      5,
+      9,
+      13,
+      17,
+      21,
+      25
+    ]
+  },
+  {
+    "type": "table",
+    "n": 14,
+    "label": "tab:pheno",
+    "rows": [
+      [
+        "Phenotype (14-leaf tree rules)",
+        "n",
+        "Deaths",
+        "Deaths per 100 admissions",
+        "Admission share",
+        "Death share",
+        "Cumulative death share"
+      ],
+      [
+        "Age >86; COVID-19; admitted in 2020–2021; neither basic hospital nor general clinic",
+        "799",
+        "395",
+        "49.4",
+        "0.7%",
+        "4.8%",
+        "5%"
+      ],
+      [
+        "Age 74–86; COVID-19; admitted in 2020–2021; neither basic hospital nor general clinic",
+        "2,382",
+        "944",
+        "39.6",
+        "2.1%",
+        "11.5%",
+        "16%"
+      ],
+      [
+        "Age >74; COVID-19; admitted in 2020–2021; basic hospital or general clinic",
+        "854",
+        "297",
+        "34.8",
+        "0.7%",
+        "3.6%",
+        "20%"
+      ],
+      [
+        "Age 64–74; COVID-19; admitted in 2020–2021",
+        "4,415",
+        "1,233",
+        "27.9",
+        "3.8%",
+        "15.0%",
+        "35%"
+      ],
+      [
+        "Age >46; non-COVID-19; neither basic hospital nor general clinic; pneumonia (any type); admitted in 2020–2021",
+        "2,253",
+        "473",
+        "21.0",
+        "2.0%",
+        "5.8%",
+        "41%"
+      ],
+      [
+        "Age >64; COVID-19; outside 2020–2021",
+        "1,600",
+        "322",
+        "20.1",
+        "1.4%",
+        "3.9%",
+        "45%"
+      ],
+      [
+        "Age 58–64; COVID-19",
+        "3,611",
+        "703",
+        "19.5",
+        "3.1%",
+        "8.6%",
+        "53%"
+      ],
+      [
+        "Age >80; non-COVID-19; neither basic hospital nor general clinic; pneumonia (any type); outside 2020–2021",
+        "5,121",
+        "801",
+        "15.6",
+        "4.4%",
+        "9.7%",
+        "63%"
+      ],
+      [
+        "Age 46–58; COVID-19",
+        "5,870",
+        "794",
+        "13.5",
+        "5.1%",
+        "9.7%",
+        "73%"
+      ],
+      [
+        "Age 46–80; non-COVID-19; neither basic hospital nor general clinic; pneumonia (any type); outside 2020–2021",
+        "5,730",
+        "685",
+        "12.0",
+        "5.0%",
+        "8.3%",
+        "81%"
+      ],
+      [
+        "Age >46; non-COVID-19; basic hospital or general clinic",
+        "9,594",
+        "553",
+        "5.8",
+        "8.3%",
+        "6.7%",
+        "88%"
+      ],
+      [
+        "Age >46; non-COVID-19; neither basic hospital nor general clinic; non-pneumonia (any type)",
+        "1,527",
+        "79",
+        "5.2",
+        "1.3%",
+        "1.0%",
+        "89%"
+      ],
+      [
+        "Age 18–46",
+        "12,682",
+        "642",
+        "5.1",
+        "11.0%",
+        "7.8%",
+        "96%"
+      ],
+      [
+        "Age ≤18",
+        "58,801",
+        "299",
+        "0.5",
+        "51.0%",
+        "3.6%",
+        "100%"
+      ]
+    ],
+    "spans": [],
+    "separators": [
+      1
+    ]
+  }
+]
